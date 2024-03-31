@@ -9,6 +9,7 @@ int main(){
     mpz_init(n);
     gmp_fscanf(stdin, "%Zd", n);
 
+    /*
     if(!trial_division_primetest(n, 1000000)){
         printf("n is trivially factorable\n");
         return 0;
@@ -31,11 +32,13 @@ int main(){
     }
 
     printf("Passed probable prime test\n");
-
+    */
 
     mpz_t a, b;
-    mpz_inits(a, b);
+    mpz_init(a);
+    mpz_init(b);
     fermat_naive(n, a, b);
 
+    gmp_printf("n = %Zd * %Zd\n", a, b);
     return 0;
 }
