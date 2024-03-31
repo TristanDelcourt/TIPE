@@ -1,6 +1,7 @@
 #include <gmp.h>
 #include <stdio.h> 
 #include "prime_test.h"
+#include "fermat.h"
 
 int main(){
 
@@ -9,7 +10,7 @@ int main(){
     gmp_fscanf(stdin, "%Zd", n);
 
     if(!trial_division_primetest(n, 1000000)){
-        gmp_printf("%Zd is not prime\n", n);
+        printf("n is trivially factorable\n");
         return 0;
     }
     printf("Passed trial division test\n");
@@ -24,13 +25,17 @@ int main(){
         mpz_sub_ui(n_minus_1, n, 1);
         
         if(powmod(a, n_minus_1, n) == 1){
-            gmp_printf("%Zd is not prime\n", n);
+            printf("n is trivially factorable\n");
             return 0;
         }
     }
 
     printf("Passed probable prime test\n");
 
+
+    mpz_t a, b;
+    mpz_inits(a, b);
+    fermat_naive(n, a, b);
 
     return 0;
 }
