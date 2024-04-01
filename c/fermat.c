@@ -1,4 +1,5 @@
 #include <gmp.h>
+#include <stdbool.h>
 
 void fermat_naive(mpz_t n, mpz_t a, mpz_t b) {
         
@@ -54,3 +55,55 @@ void fermat_naive(mpz_t n, mpz_t a, mpz_t b) {
     mpz_divexact_ui(b, b, 2);
 }
 
+bool checkgcd(mpz_t n, mpz_t a, mpz_t d){
+    mpz_t gcd;
+    mpz_init(gcd);
+    mpz_gcd(gcd, n, a);
+    if (mpz_cmp_ui(gcd, 1) > 0){
+        mpz_set(d, gcd);
+        return true;
+    }
+    return false;
+}
+
+bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
+    // using x**2 + c
+
+    mpz_t x_1, x_2, product;
+    mpz_init_set_ui(x_1, 2);
+    mpz_init_set_ui(x_2, 4 + c);
+    mpz_init(product);
+
+    int range = 1;
+    int terms = 0;
+
+    while (terms <= max){
+        for(int j = 1; j <= range; j++){
+            mpz_mul(x_2, x_2, x_2);
+            mpz_add_ui(x_2, x_2, c);
+            mpz_mod(x_2, x_2, n);
+
+            mpz_t temp;
+            mpz_init(temp);
+            mpz_sub(temp, x_1, x_2);
+            mpz_mul(product, product, temp);
+            mpz_mod(product, product, n);
+
+            terms += 1;
+            if (terms % 10 == 0)
+                if (checkgcd(n, product, d))
+                    mpz_set_ui(product, 1);
+                else
+                    return true;
+
+        }
+        mpz_set(x_1, x_2);
+        range *= 2;
+        for(int j = 1; j <= range; j++){
+            mpz_mul(x_2, x_2, x_2);
+            mpz_add_ui(x_2, x_2, c);
+            mpz_mod(x_2, x_2, n);
+        }
+
+    }
+}
