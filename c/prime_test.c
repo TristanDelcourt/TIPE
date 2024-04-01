@@ -75,8 +75,6 @@ bool miller_rabin_primality_test(mpz_t n, int k){
     mpz_init(d);
     factor_out_powers_of_2(n_minus_1, s, d);
 
-    gmp_printf("s: %Zd, d: %Zd\n", s, d);
-
     mpz_t a;
     mpz_init(a);
     gmp_randstate_t state;
@@ -119,24 +117,34 @@ bool miller_rabin_primality_test(mpz_t n, int k){
 }
 
 bool probable_prime_test(mpz_t n){
+    printf("-------- Primetesting n --------\n");
 
     // Trial division test
     if(!trial_division_test(n, 1000000)){
+        printf("Trivial division : composite\n");
+        printf("-------- n is composite --------\n");
+
         return false;
     }
-    printf("Trial division test passed\n");
+    printf("Trivial division : prime\n");
 
     // Fermat primality test
     if(!fermat_primality_test(n)){
+        printf("Fermat primality : composite\n");
+        printf("-------- n is composite --------\n");
         return false;
     }
-    printf("Fermat primality test passed\n");
+    printf("Fermat primality : prime\n");
 
     // Miller-Rabin primality test
     if(!miller_rabin_primality_test(n, 1000)){
+        printf("Miller-Rabin     : composite\n");
+        printf("-------- n is composite --------\n");
         return false;
     }
-    printf("Miller-Rabin primality test passed\n");
+    printf("Miller-Rabin     : prime\n");
 
+
+    printf("---------- n is prime ----------\n");
     return true;
 }

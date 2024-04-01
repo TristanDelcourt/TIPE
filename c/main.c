@@ -38,14 +38,16 @@ int main(int argc, char **argv){
     mpz_init(b);
 
     // ALGO PAGE 59
-    //fermat_naive(n, a, b);
+    /*
+    fermat_naive(n, a, b);
+    gmp_printf("n = %Zd * %Zd\n", a, b);
+    */
 
     // ALGO PAGE 65
     int c = 1;
     clock_t start = clock();
     clock_t stop = clock();
     while((stop - start)/CLOCKS_PER_SEC < max_time){
-        printf("c: %d\n", c);
 
         if (brent_pollard_rho(n, c, 10000, a)){
             if (mpz_divisible_p(n, a)){
@@ -60,7 +62,6 @@ int main(int argc, char **argv){
     }
 
     return 0;
-    
 }
 
 
@@ -128,4 +129,12 @@ int main(int argc, char **argv){
 08767245400709865962598074672761306359561956479301
 59203542650243945443855336314295834358320681266171
 20854020561729270545073867874679354944583222503
+
+
+// Product of big primes
+19488684264759095808522956666290465810540813435172
+71279952221052088685584859418556624147446136712530
+27013347378718661946636748303020254523540374555070
+19635897398047834278780728850707335150014968886475
+9063720703111
 */
