@@ -23,18 +23,21 @@ bool trial_division_test(mpz_t n, int max){
 }
 
 
-int powmod(mpz_t a, mpz_t b, mpz_t m){
-    mpz_t n;
-    mpz_init_set_ui(n, 1);
-    
-    while (mpz_sgn(b) > 0){
-        if (mpz_congruent_ui_p(b, 1, 2)){
-            mpz_mul(n, n, a);
+void powmod(mpz_t n, mpz_t a, mpz_t b, mpz_t m){
+    mpz_t a_copy, b_copy;
+    mpz_init_set(a_copy, a);
+    mpz_init_set(b_copy, b);
+
+    mpz_set_ui(n, 1);
+    while (mpz_sgn(b_copy) > 0){
+        if (mpz_congruent_ui_p(b_copy, 1, 2)){
+            mpz_mul(n, n, a_copy);
             mpz_mod(n, n, m);
         }
-        mpz_fdiv_q_ui(b, b, 2);
+        mpz_fdiv_q_ui(b_copy, b_copy, 2);
+        mpz_mul(a_copy, a_copy, a_copy);
+        mpz_mod(a_copy, a_copy, m);
     }
-    return mpz_get_ui(n);
 }
 
 bool fermat_primality_test(mpz_t n){
@@ -47,7 +50,11 @@ bool fermat_primality_test(mpz_t n){
         mpz_init(n_minus_1);
         mpz_sub_ui(n_minus_1, n, 1);
         
-        if(powmod(a, n_minus_1, n) == 1){
+        mpz_t out;
+        mpz_init(out);
+        powmod(out, a, n_minus_1, n);
+
+        if(mpz_cmp_ui(out, 1) != 0){
             return false;
         }
     }
@@ -91,7 +98,7 @@ bool miller_rabin_primality_test(mpz_t n, int k){
 
         mpz_t x;
         mpz_init(x);
-        mpz_powm(x, a, d, n);
+        powmod(x, a, d, n);
 
         mpz_t y;
         mpz_init(y);
