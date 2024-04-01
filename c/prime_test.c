@@ -1,7 +1,9 @@
 #include <gmp.h>
 #include <stdbool.h>
+#include <time.h>
+#include <stdio.h>
 
-bool trial_division_primetest(mpz_t n, int max){
+bool trial_division_test(mpz_t n, int max){
     
     for(int d = 2; d < 4; d++) {
         if (mpz_congruent_ui_p(n, 0, d))
@@ -20,6 +22,7 @@ bool trial_division_primetest(mpz_t n, int max){
     return true;
 }
 
+
 int powmod(mpz_t a, mpz_t b, mpz_t m){
     mpz_t n;
     mpz_init_set_ui(n, 1);
@@ -32,4 +35,108 @@ int powmod(mpz_t a, mpz_t b, mpz_t m){
         mpz_fdiv_q_ui(b, b, 2);
     }
     return mpz_get_ui(n);
+}
+
+bool fermat_primality_test(mpz_t n){
+
+    for(int i = 3; i<7; i+=2){
+        mpz_t a;
+        mpz_init_set_ui(a, i);
+
+        mpz_t n_minus_1;
+        mpz_init(n_minus_1);
+        mpz_sub_ui(n_minus_1, n, 1);
+        
+        if(powmod(a, n_minus_1, n) == 1){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void factor_out_powers_of_2(mpz_t n, mpz_t s, mpz_t d){
+    mpz_set_ui(s, 0);
+    mpz_set(d, n);
+
+    while(mpz_congruent_ui_p(d, 0, 2)){
+        mpz_fdiv_q_ui(d, d, 2);
+        mpz_add_ui(s, s, 1);
+    }
+}
+
+bool miller_rabin_primality_test(mpz_t n, int k){
+
+    mpz_t n_minus_1;
+    mpz_init(n_minus_1);
+    mpz_sub_ui(n_minus_1, n, 1);
+    mpz_t s, d;
+    mpz_init(s);
+    mpz_init(d);
+    factor_out_powers_of_2(n_minus_1, s, d);
+
+    gmp_printf("s: %Zd, d: %Zd\n", s, d);
+
+    mpz_t a;
+    mpz_init(a);
+    gmp_randstate_t state;
+    gmp_randinit_default(state);
+    gmp_randseed_ui(state, time(NULL));
+
+    for(int i = 0; i < k; i++){
+
+        // Generate random number between 2 and n-2
+        mpz_set(a, n);
+        mpz_sub_ui(a, a, 3);
+        mpz_urandomm(a, state, a);
+        mpz_add_ui(a, a, 2);
+
+        mpz_t x;
+        mpz_init(x);
+        mpz_powm(x, a, d, n);
+
+        mpz_t y;
+        mpz_init(y);
+
+        for(int j = 0; mpz_cmp_ui(s, j) > 0; j++){
+
+            mpz_powm_ui(y, x, 2, n);
+
+            if(mpz_cmp_ui(y, 1) == 0 && mpz_cmp_ui(x, 1) != 0 && mpz_cmp(x, n_minus_1) != 0){
+                return false;
+            }
+
+            mpz_set(x, y);
+        }
+
+        if(mpz_cmp_ui(y, 1) != 0){
+            return false;
+        }
+
+    }
+    
+    return true;
+}
+
+bool probable_prime_test(mpz_t n){
+
+    // Trial division test
+    if(!trial_division_test(n, 1000000)){
+        return false;
+    }
+    printf("Trial division test passed\n");
+
+    // Fermat primality test
+    if(!fermat_primality_test(n)){
+        return false;
+    }
+    printf("Fermat primality test passed\n");
+
+    // Miller-Rabin primality test
+    if(!miller_rabin_primality_test(n, 1000)){
+        return false;
+    }
+    printf("Miller-Rabin primality test passed\n");
+
+    return true;
 }
