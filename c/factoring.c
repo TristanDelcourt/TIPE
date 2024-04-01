@@ -1,5 +1,6 @@
 #include <gmp.h>
 #include <stdbool.h>
+#include "big_int.h"
 
 void fermat_naive(mpz_t n, mpz_t a, mpz_t b) {
         
@@ -58,7 +59,7 @@ void fermat_naive(mpz_t n, mpz_t a, mpz_t b) {
 bool checkgcd(mpz_t n, mpz_t a, mpz_t d){
     mpz_t gcd;
     mpz_init(gcd);
-    mpz_gcd(gcd, n, a);
+    mpz_gcd(gcd, n, a); // TODO
     if (mpz_cmp_ui(gcd, 1) > 0){
         mpz_set(d, gcd);
         return true;
@@ -107,4 +108,21 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
 
     }
     return false;
+}
+
+bool pollard_p_minus_1(mpz_t n, int c, int max, mpz_t d){
+    mpz_t m;
+    mpz_init_set_ui(m, c);
+
+    for(int i = 0; i>max; i++){
+        mpz_t a;
+        mpz_init_set_ui(a, i);
+        powmod(m, m, a, n);
+        if(i%10 == 0){
+            if (!checkgcd(n, m, d))
+                return false;
+            else
+                return true;
+        }
+    }
 }
