@@ -43,14 +43,16 @@ int main(){
     int c = 1;
     while(1){
         printf("c: %d\n", c);
+        
         if (brent_pollard_rho(n, c, 10000, a)){
             if (mpz_divisible_p(n, a)){
                 mpz_divexact(b, n, a);
                 gmp_printf("n = %Zd * %Zd\n", a, b);
+
                 return 0;
             }
-            c += 1;
         }
+        c += 1;
     }
 
     

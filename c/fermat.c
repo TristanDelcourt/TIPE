@@ -72,7 +72,7 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
     mpz_t x_1, x_2, product;
     mpz_init_set_ui(x_1, 2);
     mpz_init_set_ui(x_2, 4 + c);
-    mpz_init(product);
+    mpz_init_set_ui(product, 1);
 
     int range = 1;
     int terms = 0;
@@ -91,7 +91,7 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
 
             terms += 1;
             if (terms % 10 == 0)
-                if (checkgcd(n, product, d))
+                if (!checkgcd(n, product, d))
                     mpz_set_ui(product, 1);
                 else
                     return true;
@@ -106,4 +106,5 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
         }
 
     }
+    return false;
 }
