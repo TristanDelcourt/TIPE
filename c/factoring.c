@@ -54,6 +54,9 @@ void fermat_naive(mpz_t n, mpz_t a, mpz_t b) {
 
     mpz_sub(b, u, v);
     mpz_divexact_ui(b, b, 2);
+
+    mpz_clears(SQRT, r, u, v, NULL);
+
 }
 
 bool checkgcd(mpz_t n, mpz_t a, mpz_t d){
@@ -62,13 +65,16 @@ bool checkgcd(mpz_t n, mpz_t a, mpz_t d){
     mpz_gcd(gcd, n, a); // TODO
     if (mpz_cmp_ui(gcd, 1) > 0){
         mpz_set(d, gcd);
+
+        mpz_clear(gcd);
         return true;
     }
+    //mpz_clear(gcd);
     return false;
 }
 
 bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
-    // using x**2 + c
+    // using f(x) = x**2 + c
 
     mpz_t x_1, x_2, product;
     mpz_init_set_ui(x_1, 2);
@@ -95,6 +101,7 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
                 if (!checkgcd(n, product, d))
                     mpz_set_ui(product, 1);
                 else
+                    //mpz_clears(x_1, x_2, product, temp, NULL);
                     return true;
 
         }
@@ -107,6 +114,7 @@ bool brent_pollard_rho(mpz_t n, int c, int max, mpz_t d) {
         }
 
     }
+    //mpz_clears(x_1, x_2, product, NULL);
     return false;
 }
 

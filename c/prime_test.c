@@ -38,6 +38,7 @@ bool fermat_primality_test(mpz_t n){
         powmod(out, a, n_minus_1, n);
 
         if(mpz_cmp_ui(out, 1) != 0){
+            mpz_clears(a, n_minus_1, out, NULL);
             return false;
         }
     }
@@ -91,6 +92,8 @@ bool miller_rabin_primality_test(mpz_t n, int k){
             mpz_powm_ui(y, x, 2, n);
 
             if(mpz_cmp_ui(y, 1) == 0 && mpz_cmp_ui(x, 1) != 0 && mpz_cmp(x, n_minus_1) != 0){
+
+                mpz_clears(n_minus_1, s, d, a, x, y, NULL);
                 return false;
             }
 
@@ -98,11 +101,12 @@ bool miller_rabin_primality_test(mpz_t n, int k){
         }
 
         if(mpz_cmp_ui(y, 1) != 0){
+            mpz_clears(n_minus_1, s, d, a, x, y, NULL);
             return false;
         }
 
     }
-    
+    mpz_clears(n_minus_1, s, d, a, NULL);
     return true;
 }
 
@@ -120,11 +124,11 @@ bool probable_prime_test(mpz_t n){
 
     // Fermat primality test
     if(!fermat_primality_test(n)){
-        printf("Fermat primality : composite\n");
+        printf("Fermat           : composite\n");
         printf("-------- n is composite --------\n");
         return false;
     }
-    printf("Fermat primality : prime\n");
+    printf("Fermat           : prime\n");
 
     // Miller-Rabin primality test
     if(!miller_rabin_primality_test(n, 1000)){
