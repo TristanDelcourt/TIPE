@@ -1,29 +1,23 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "vector.h"
+#include <gmp.h>
 
-void print_list_vect(bnvect_t** l, int n){
+void print_list(int* l, int n){
     for(int i = 0; i<n; i++){
-        bnvect_print(l[i]);
-        printf("\n");
+        printf("%d ", l[i]);
     }
 }
 
-
-bnvect_t** init_list(int n){
-    bnvect_t** l = malloc(n*sizeof(bnvect_t*));
-    return l;
-}
-
-bool factorise(mpz_t n, bnvect_t* vi, int piB){
-    bnvect_set_si(vi, 0);
-    mpz_t n_prime;
+bool factorise(mpz_t n, int* vi, int piB){
+    for(int i = 0; i<piB; i++){
+        vi[i] = 0;
+    }
 
     for(int d = 2; d < 4; d++) {
         while (mpz_congruent_ui_p(n, 0, d)){
             mpz_divexact_ui(n, n, d);
-            bnvect_add_index_ui(vi, 1, d-2);
+            vi[d-2]++;
         }
 
     }
@@ -37,7 +31,7 @@ bool factorise(mpz_t n, bnvect_t* vi, int piB){
 
         while (mpz_congruent_ui_p(n, 0, d)){
             mpz_divexact_ui(n, n, d);
-            bnvect_add_index_ui(vi, 1, i);
+            vi[i]++;
         }
         d += add;
         add = 6 - add;
@@ -47,24 +41,52 @@ bool factorise(mpz_t n, bnvect_t* vi, int piB){
     return true;
 }
 
-void get_zi(bnvect_t* vi, mpz_t zi, mpz_t N, int piB){
-    gmp_randstate_t rstate;
-    gmp_randinit_mt(rstate);
+int* get_zi(mpz_t zi, mpz_t N, int piB, gmp_randstate_t rstate){
     bool found = false;
+    int* vi = malloc(piB*sizeof(int));
 
     while(!found){
         mpz_urandomm(zi, rstate, N);
         mpz_t zi_2;
+        mpz_init(zi_2);
         mpz_mul(zi_2, zi, zi);
         mpz_mod(zi_2, zi_2, N);
         //gmp_printf("%Zd\n", zi_2);
         found = factorise(zi_2, vi, piB);
     }
+
+    return vi;
 }
 
 
-void get_all_zi(){
-    return;
+int** get_all_zi(mpz_t* z, mpz_t N, int piB){
+    gmp_randstate_t rstate;
+    //unsigned long seed;
+    gmp_randinit_default(rstate);
+    //gmp_randseed_ui(rstate, seed);
+
+    int** v = malloc((piB+1)*sizeof(int*));
+    for(int i = 0; i < piB+1; i++){
+        v[i] = get_zi(z[i], N, piB, rstate);  
+    }
+
+    return v;
+}
+
+void dixon(mpz_t N, int piB){
+
+    mpz_t* z = malloc((piB+1)*sizeof(mpz_t));
+    for(int i = 0; i < piB +1; i++){
+        mpz_init(z[i]);
+    }
+
+    int** v = get_all_zi(z, N, piB);
+    for(int i = 0; i < piB+1; i++){
+        gmp_printf("%zd\n", z[i]);
+        print_list(v[i], piB);
+        printf("\n");
+    }
+
 }
 
 void main(int agrc, char**argv){
@@ -73,20 +95,7 @@ void main(int agrc, char**argv){
     mpz_t N;
     mpz_init_set_str(N, argv[1], 10);
 
-    bnvect_t* v = bnvect_init(piB);
+    dixon(N, piB);
     
-    mpz_t zi;
-    mpz_init(zi);
-
-    get_zi(v, zi, N, piB);
-
-    /*
-    mpz_init_set_ui(zi, 16853);
-    mpz_mul(zi, zi, zi);
-    mpz_mod_ui(zi, zi, 20382493);
-    
-    bool out = factorise(zi, v, piB);
-    */
-    bnvect_print(v);
 
 }
