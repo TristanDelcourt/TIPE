@@ -48,10 +48,10 @@ int pi(int n) {
     return k;
 } 
 
-int* primes(int piB, int n){
+int* primes(int piB, int B){
     int* p = malloc(piB*sizeof(piB));
     int k = 0;
-    for (int i = 2; i <= n; i++) { 
+    for (int i = 2; i <= B; i++) { 
         if (isPrime(i)){
             p[k] = i;
             k++;
@@ -61,24 +61,31 @@ int* primes(int piB, int n){
 
 }
 
+bool euler_criterion(mpz_t n, int p){
+    int e = (p-1)/2;
+    mpz_t r, p1;
+    mpz_init(r);
+    mpz_init_set_ui(p1, p);
+    mpz_powm_ui(r, n, e, p1);
+    return(mpz_cmp_ui(r, 1) == 0);
+}
 
-/* DIXON */
+int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
+    int* pb = malloc(piB*sizeof(int));
+    pb[0] = 2;
 
-bool factorise(mpz_t n, int* v, int piB, int* primes){
-    for(int i = 0; i<piB; i++){
-        v[i] = 0;
-    }
-    
-    for(int i = 0; i<piB && mpz_cmp_ui(n, 1); i++){
-        while (mpz_congruent_ui_p(n, 0, primes[i])){
-            mpz_divexact_ui(n, n, primes[i]);
-            v[i]++;
+    int j = 1;
+    for(int i = 1; i<piB; i++){
+        if(euler_criterion(n, primes[i])){
+            pb[j] = primes[i];
+            j++;
         }
     }
 
-    if(!mpz_cmp_ui(n, 1))
-        return true;
-    return false;
+    //printf("base reduction %f percent\n", (float)j/piB*100);
+    *pb_len = j;
+    pb = realloc(pb, j);
+    return pb;
 }
 
 void swap_lines(int** v, int i, int j){
@@ -167,31 +174,60 @@ int** transpose(int** v, int n1, int n2){
     return m;
 }
 
-int** get_all_zi(mpz_t* z, mpz_t N, int piB, int* primes){
+
+
+bool factorise(mpz_t n, int* v, int pb_len, int* pb){
+    for(int i = 0; i<pb_len; i++){
+        v[i] = 0;
+    }
+    
+    for(int i = 0; i<pb_len && mpz_cmp_ui(n, 1); i++){
+        while (mpz_divisible_ui_p(n, pb[i])){
+            v[i]++;
+            mpz_divexact_ui(n, n, pb[i]);
+        }
+    }
+
+    if(!mpz_cmp_ui(n, 1))
+        return true;
+    return false;
+}
+
+int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb){
+    //ceil(sqrt(n))
+    mpz_t sqrt_n;
+    mpz_init(sqrt_n);
+    mpz_root(sqrt_n, N, 2);
+    mpz_add_ui(sqrt_n, sqrt_n, 1);
+
     mpz_t x;
-    mpz_init(x);
-    mpz_root(x, N, 2);
-    mpz_t x_2_n;
-    mpz_init(x_2_n);
+    mpz_init_set_ui(x, 1);
 
-    int** v = malloc((piB+1)*sizeof(int*));
+    mpz_t zi;
+    mpz_t qx;
+    mpz_inits(zi, qx, NULL);
 
-    for(int i = 0; i < piB+1; i++){
+    int** v = malloc((pb_len+1)*sizeof(int*));
+
+    for(int i = 0; i < pb_len+1; i++){
         bool found = false;
-        int* vi = malloc(piB*sizeof(int));
+        int* vi = malloc(pb_len*sizeof(int));
 
         while(!found){
+            mpz_add(zi, sqrt_n, x);            
+
+            //Q(x)
+            mpz_mul(qx, zi, zi);
+            mpz_sub(qx, qx, N);
+            found = factorise(qx, vi, pb_len, pb);
+
             mpz_add_ui(x, x, 1);
-            mpz_mul(x_2_n, x, x);
-            mpz_sub(x_2_n, x_2_n, N);
-            //gmp_printf("%Zd\n", x_2_n);
-            found = factorise(x_2_n, vi, piB, primes);
         }
 
         v[i] = vi;
-        mpz_set(z[i], x);
+        mpz_set(z[i], zi);
         //gmp_printf("%Zd\n", z[i]);
-        //print_list(vi, piB);
+        //print_list(vi, pb_len);
         //printf("\n\n");
     }
 
@@ -267,38 +303,38 @@ int* gaussian_solve(int** v, int n1, int n2){
 void dixon(mpz_t N, int B){
     int piB = pi(B);
     int* p = primes(piB, B);
-    //print_list(p, piB);
 
-    mpz_t* z = malloc((piB+1)*sizeof(mpz_t));
-    for(int i = 0; i < piB +1; i++){
+    int pb_len;
+    int* pb = prime_base(N, &pb_len, p, piB);
+    //print_list(pb, pb_len);
+
+    mpz_t* z = malloc((pb_len+1)*sizeof(mpz_t));
+    for(int i = 0; i < pb_len +1; i++){
         mpz_init(z[i]);
     }
 
     //Getting zis
     clock_t t1 = clock();
-    int** v = get_all_zi(z, N, piB, p);
+    int** v = get_all_zi(z, N, pb_len, pb);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Time to get zi: %fs\n", time_spent);
 
     //Solving matrix
     t1 = clock();
-    int* solution = gaussian_solve(v, piB+1, piB);
+    int* solution = gaussian_solve(v, pb_len+1, pb_len);
     t2 = clock();
     time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Time to get solve matrix: %fs\n", time_spent);
 
 
-    int* sum = sum_lignes(v, piB+1, piB, solution);
-    div_vect(sum, 2, piB);
+    int* sum = sum_lignes(v, pb_len+1, pb_len, solution);
+    div_vect(sum, 2, pb_len);
 
-    mpz_t Z1;
-    mpz_init(Z1);
-    prod_vect(Z1, z, piB+1);
-
-    mpz_t Z2;
-    mpz_init(Z2);
-    rebuild(Z2, sum, p, piB);
+    mpz_t Z1, Z2;
+    mpz_inits(Z1, Z2, NULL);
+    prod_vect(Z1, z, pb_len+1);
+    rebuild(Z2, sum, p, pb_len);
 
     mpz_t f1, f2;
     mpz_inits(f1, f2, NULL);
@@ -310,18 +346,16 @@ void dixon(mpz_t N, int B){
 
     gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", N, f1, N, f2);
 
-    mpz_t zero;
-    mpz_init_set_ui(zero, 0);
-    assert(mpz_congruent_p(N, zero, f1) != 0);
-    assert(mpz_congruent_p(N, zero, f2) != 0);
-
+    assert(mpz_divisible_p(N, f1));
+    assert(mpz_divisible_p(N, f2));
 }
+
 
 void main(int argc, char**argv){
     assert(argc == 2);
     srand(time(NULL));
 
-    int B = 10000;
+    int B = 1000;
     mpz_t N;
     mpz_init_set_str(N, argv[1], 10);
 

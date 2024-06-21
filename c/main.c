@@ -5,12 +5,14 @@
 #include <stdlib.h>
 #include "prime_test.h"
 #include "factoring.h"
+#include "dixon/dixon.h"
+
+#define MAX_POLLARD_RHO 10
 
 int main(int argc, char **argv){
 
-    assert(argc == 3);
-    int max_time = atoi(argv[1]);
-    bool rand = atoi(argv[2]);
+    assert(argc == 2);
+    bool rand = atoi(argv[1]);
 
     mpz_t n;
     mpz_init(n);
@@ -19,7 +21,7 @@ int main(int argc, char **argv){
         gmp_randinit_default(state);
         gmp_randseed_ui(state, time(NULL));
 
-        mpz_urandomb(n, state, 500);        
+        mpz_urandomb(n, state, 200);        
     }
 
     else{
@@ -33,9 +35,8 @@ int main(int argc, char **argv){
         return 0;
     }
 
-    mpz_t a, b;
+    mpz_t a;
     mpz_init(a);
-    mpz_init(b);
 
     /*
     // ALGO PAGE 59
@@ -47,15 +48,14 @@ int main(int argc, char **argv){
     // ALGO PAGE 65
     int c = 1;
     clock_t start = clock();
-    clock_t stop = clock();
-    int exec_time = (stop - start)/CLOCKS_PER_SEC;
+    clock_t stop;
+    int exec_time;
 
-    while(exec_time < max_time){
+    while(exec_time < MAX_POLLARD_RHO){
 
         if (brent_pollard_rho(n, c, 100000, a)){
             if (mpz_divisible_p(n, a)){
-                mpz_divexact(b, n, a);
-                gmp_printf("n = %Zd * %Zd\n", a, b);
+                gmp_printf("Pollard_rho found: %Zd = 0 [%Zd]\n", n, a);
                 return 0;
             }
         }
@@ -64,9 +64,11 @@ int main(int argc, char **argv){
         stop = clock();
         exec_time = (stop - start)/CLOCKS_PER_SEC;
     }
+    gmp_printf("Pollard rho failed\n n = %Zd", n);
 
+    // ALGO PAGE JSP
+    dixon(n, 10000);
 
-    gmp_printf("failed\n n = %Zd", n);
     return 0;
 }
 
