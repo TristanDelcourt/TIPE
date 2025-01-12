@@ -5,12 +5,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-void sub_system(system_t s, int i, int j, int n1){
-    for(int k = 0; k<n1; k++){
-        s->m[i][k] = s->m[i][k] - s->m[j][k];
-    }
-}
-
 void swap_lines_horz(system_t s, int i, int j){
     int* temp = s->m[i];
     s->m[i] = s->m[j];
@@ -42,7 +36,7 @@ system_t transpose(int** v, int n1, int n2){
     system_t s = malloc(sizeof(system_s));
 
     s->m = malloc(n2*sizeof(int*));
-    for(int i = 0; i<n1; i++){
+    for(int i = 0; i<n2; i++){
         s->m[i] = malloc(n1*sizeof(int));
         for(int j = 0; j<n1; j++){
             s->m[i][j] = v[j][i];
@@ -66,16 +60,14 @@ void triangulate(system_t s){
         int k = find_index(s, i, j);
         if(k != -1){
             if(i != j){
-                print_ll(s->m, s->n1, s->n2);
                 swap_lines_vert(s, i, j);
-                print_ll(s->m, s->n1, s->n2);
             }
 
             swap_lines_horz(s, i, k);
 
             for(int l = i + 1; l < s->n1; l++){
                 if(s->m[l][i] == 1){
-                    sub_system(s, l, i, s->n2);
+                    sub_vect(s->m, l, i, s->n2);
                     mod_vect(s->m[l], 2, s->n2);
                 }
             }
@@ -89,7 +81,7 @@ void triangulate(system_t s){
 }
 
 void get_arbitary(system_t triangulated){
-    for(int i = triangulated->n1-1; i>=1; i--){
+    for(int i = triangulated->n1-1; i>=0; i--){
         int j = 0;
         while(j < triangulated->n2 && !triangulated->m[i][j]){
             j++;
@@ -122,26 +114,26 @@ void iter_sol(system_t s){
 }
 
 system_t init_gauss(int** v, int n1, int n2){
-    printf("Initial vectors\n");
-    print_ll(v, n1, n2);
+    //printf("Initial vectors\n");
+    //print_ll(v, n1, n2);
     
     system_t s = transpose(v, n1, n2);
     s->done = false;
 
     //printf("Transposed\n");
-    //print_ll(m, n2, n1);
+    //print_ll(s->m, s->n1, s->n2);
     
-    for(int i = 0; i<n2; i++){
-        mod_vect(s->m[i], 2, n1);
+    for(int i = 0; i<s->n1; i++){
+        mod_vect(s->m[i], 2, s->n2);
     }
 
     //printf("Modded\n");
-    //print_ll(m, n2, n1);
+    //print_ll(s->m, s->n1, s->n2);
 
     triangulate(s);
     
-    printf("Triangulated\n");
-    print_ll(s->m, s->n1, s->n2);
+    //printf("Triangulated\n");
+    //print_ll(s->m, s->n1, s->n2);
 
     get_arbitary(s);
     init_sol(s);

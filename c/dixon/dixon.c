@@ -104,7 +104,7 @@ void sum_lignes(int* sum, int** v, system_t s){
     }
 
     for(int i = 0; i<s->n2; i++){
-        if(s->sol[s->perm[i]]){
+        if(s->sol[i]){
             add_vect(sum, v[s->perm[i]], s->n1);
         }
     }
@@ -221,14 +221,6 @@ void dixon(mpz_t N, int B, int extra){
     
     //gaussian init
     system_t s = init_gauss(v, pb_len+extra, pb_len);
-    print_list(s->perm, s->n2);
-    printf("%d %d\n", s->n1, s->n2);
-
-    for(int i = 0; i<s->arb; i++){
-        printf("  ");
-    }
-    printf("|\n");
-
     int* sum = malloc(pb_len*sizeof(int));
 
 
@@ -236,10 +228,8 @@ void dixon(mpz_t N, int B, int extra){
     while(!done){
 
         gaussian_step(s);
-        print_list(s->sol, pb_len+extra);
 
         sum_lignes(sum, v, s);
-        print_list(sum, pb_len);
         div_vect(sum, 2, pb_len);
 
         prod_vect(Z1, z, pb_len+extra);
@@ -282,7 +272,7 @@ int main(int argc, char**argv){
     assert(argc == 2);
     srand(time(NULL));
 
-    int B = 20;
+    int B = 10000;
     mpz_t N;
     mpz_init_set_str(N, argv[1], 10);
 

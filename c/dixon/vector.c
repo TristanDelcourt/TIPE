@@ -1,17 +1,10 @@
 #include <gmp.h>
 #include <assert.h>
-
-unsigned modulo(int value, unsigned m) {
-    int mod = value % (int)m;
-    if (mod < 0) {
-        mod += m;
-    }
-    return mod;
-}
+#include <stdlib.h>
 
 void mod_vect(int* v, int mod, int n1){
     for(int i = 0; i<n1; i++){
-        v[i] = modulo(v[i], mod);
+        v[i] = abs(v[i]) % mod;
     }
 }
 
