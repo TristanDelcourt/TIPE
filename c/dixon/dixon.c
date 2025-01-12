@@ -4,31 +4,13 @@
 #include <gmp.h>
 #include <assert.h>
 #include <time.h>
+#include "system.h"
+#include "vector.h"
+#include "list_matrix_utils.h"
 
 //#define MUL_KARATSUBA_THRESHHOLD 10
 
-void print_list(int* l, int n){
-    for(int i = 0; i<n; i++){
-        printf("%d ", l[i]);
-    }
-    printf("\n");
-}
-
-void print_ll(int** ll, int n1, int n2){
-    for(int i = 0; i<n1; i++){
-        print_list(ll[i], n2);
-    }
-    printf("\n");
-}
-
-void free_ll(int** m, int n1, int n2){
-    for(int i = 0; i<n1; i++){
-        free(m[i]);
-    }
-    free(m);
-}
-
-bool isPrime(int n) { 
+bool is_prime(int n) { 
     // Corner cases 
     if (n <= 1) 
         return false; 
@@ -50,7 +32,7 @@ bool isPrime(int n) {
 int pi(int n) { 
     int k = 0;
     for (int i = 2; i <= n; i++) { 
-        if (isPrime(i)) 
+        if (is_prime(i)) 
             k++;; 
     } 
     return k;
@@ -60,7 +42,7 @@ int* primes(int piB, int B){
     int* p = malloc(piB*sizeof(int));
     int k = 0;
     for (int i = 2; i <= B; i++) { 
-        if (isPrime(i)){
+        if (is_prime(i)){
             p[k] = i;
             k++;
         }
@@ -104,53 +86,6 @@ int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
     return pb;
 }
 
-void swap_lines(int** v, int i, int j){
-    int* temp = v[i];
-    v[i] = v[j];
-    v[j] = temp;
-}
-
-int find_index(int** v, int from, int n1){
-    for(int i = from; i < n1; i++){
-        if(v[i][from]){
-            return i;
-        }
-    }
-    return -1;
-}
-
-unsigned modulo( int value, unsigned m) {
-    int mod = value % (int)m;
-    if (mod < 0) {
-        mod += m;
-    }
-    return mod;
-}
-
-void mod_vect(int* v, int mod, int n1){
-    for(int i = 0; i<n1; i++){
-        v[i] = modulo(v[i], mod);
-    }
-}
-
-void div_vect(int* v, int d, int n1){
-    for(int i = 0; i<n1; i++){
-        v[i] /= d;
-    }
-}
-
-void sub_vect(int** v, int i, int j, int n1){
-    for(int k = 0; k<n1; k++){
-        v[i][k] = v[i][k] - v[j][k];
-    }
-}
-
-void prod_vect(mpz_t prod, mpz_t* v, int n1){
-    mpz_set_ui(prod, 1);
-    for(int i = 0; i<n1; i++){
-        mpz_mul(prod, prod, v[i]);
-    }
-}
 
 void rebuild(mpz_t prod, int* v, int* primes, int n1){
     mpz_set_ui(prod, 1);
@@ -163,33 +98,17 @@ void rebuild(mpz_t prod, int* v, int* primes, int n1){
     mpz_clear(temp);
 }
 
-int* sum_lignes(int* sum, int** v, int n1, int n2, int* sol){
-
-    for(int i = 0; i<n2; i++){
+void sum_lignes(int* sum, int** v, system_t s){
+    for(int i = 0; i<s->n1; i++){
         sum[i] = 0;
-        for(int j = 0; j<n1; j++){
-            if(sol[j]){ 
-                sum[i] += v[j][i];
-            }
-        }
     }
 
-    return sum;
-}
-
-int** transpose(int** v, int n1, int n2){
-    int** m = malloc(n2*sizeof(int*));
-
-    for(int i = 0; i<n2; i++){
-        m[i] = malloc(n1*sizeof(int));
-        for(int j = 0; j<n1; j++){
-            m[i][j] = v[j][i];
+    for(int i = 0; i<s->n2; i++){
+        if(s->sol[s->perm[i]]){
+            add_vect(sum, v[s->perm[i]], s->n1);
         }
     }
-
-    return m;
 }
-
 
 
 bool factorise(mpz_t n, int* v, int pb_len, int* pb){
@@ -258,88 +177,6 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
     return v;
 }
 
-
-int* gaussian_solve(int* sol, int** v, int n1, int n2/*, int* arbitrary_indices, int* len*/){
-    //printf("Initial vectors\n");
-    //print_ll(v, n1, n2);
-    
-    int** m = transpose(v, n1, n2);
-
-    //printf("Transposed\n");
-    //print_ll(m, n2, n1);
-    
-    for(int i = 0; i<n2; i++){
-        mod_vect(m[i], 2, n1);
-    }
-
-    //printf("Modded\n");
-    //print_ll(m, n2, n1);
-
-    for(int i = 0; i<n2; i++){
-        int k = find_index(m, i, n2);
-        if(k != -1){
-            swap_lines(m, i, k);
-
-            for(int j = i + 1; j < n2; j++){
-                if(m[j][i] == 1){
-                    sub_vect(m, j, i, n1);
-                    mod_vect(m[j], 2, n1);
-                }
-            }
-        }
-    }
-    
-    //printf("Triangulate\n");
-    //print_ll(m, n2, n1);
-
-    for(int i = 0; i<n1; i++){
-        sol[i] = -1;
-    }
-
-    
-    //arbitrary_indices = malloc(n1*sizeof(int));
-    //int nb_arb = 0;
-
-
-    for(int i = n2-1; i>-1; i--){
-        int j = 0;
-        while(j < n1 && !m[i][j]){
-            j++;
-        }
-
-        if(j<n1){
-            sol[j] = 0;
-
-            for(int k = n1-1; k>j; k--){
-                if(sol[k] == -1){
-                    //arbitrary_indices[nb_arb++] = k;
-                    //sol[k] = 0;
-                    sol[k] = rand() % 2;
-                }
-                sol[j] -= m[i][k] * sol[k];
-                sol[j] = abs(sol[j]) % 2;
-            }
-        }
-    }
-
-    
-    for(int i = 0; i<n1; i++){
-        if(sol[i] == -1){
-            //arbitrary_indices[nb_arb++] = i;
-            //sol[i] = 0;
-            sol[i] = rand() % 2;
-        }
-    }
-
-    /*
-    arbitrary_indices = realloc(arbitrary_indices, nb_arb*sizeof(int));
-    print_list(arbitrary_indices, nb_arb);
-    *len = nb_arb;
-    */
-
-    free_ll(m, n2, n1);
-}
-
 /*
 bool gen_solutions(int* sol, int* indices, int n){
     int i = 0;
@@ -381,16 +218,28 @@ void dixon(mpz_t N, int B, int extra){
     
     mpz_t f1, f2, Z1, Z2;
     mpz_inits(f1, f2, Z1, Z2, NULL);
-    int* solution = malloc((pb_len+extra)*sizeof(int));
-    int* sum = malloc((pb_len+extra)*sizeof(int));
+    
+    //gaussian init
+    system_t s = init_gauss(v, pb_len+extra, pb_len);
+    print_list(s->perm, s->n2);
+    printf("%d %d\n", s->n1, s->n2);
+
+    for(int i = 0; i<s->arb; i++){
+        printf("  ");
+    }
+    printf("|\n");
+
+    int* sum = malloc(pb_len*sizeof(int));
+
 
     bool done = false;
-    int tries = 0;
     while(!done){
 
-        gaussian_solve(solution, v, pb_len+extra, pb_len);
+        gaussian_step(s);
+        print_list(s->sol, pb_len+extra);
 
-        sum_lignes(sum, v, pb_len+extra, pb_len, solution);
+        sum_lignes(sum, v, s);
+        print_list(sum, pb_len);
         div_vect(sum, 2, pb_len);
 
         prod_vect(Z1, z, pb_len+extra);
@@ -406,12 +255,12 @@ void dixon(mpz_t N, int B, int extra){
             || (!(mpz_cmp_ui(f2, 1) == 0) && (!(mpz_cmp(f2, N) == 0)))){
             done = true;
         }
-        printf("\r");
-        printf("%d tries", tries);
-        fflush(stdout);
-        tries++;
+
+        if(s->done){
+            fprintf(stderr, "ERROR: no solution for this set of zi\n");
+            exit(1);
+        }
     }
-    free(solution);
     free(sum);
     free(pb);
     free_ll(v, pb_len+extra, pb_len);
@@ -429,19 +278,21 @@ void dixon(mpz_t N, int B, int extra){
 }
 
 
-void main(int argc, char**argv){
+int main(int argc, char**argv){
     assert(argc == 2);
     srand(time(NULL));
 
-    int B = 150;
+    int B = 20;
     mpz_t N;
     mpz_init_set_str(N, argv[1], 10);
 
     clock_t t1 = clock();
-    dixon(N, B, 10);
+    dixon(N, B, 5);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Total time: %fs\n", time_spent);
 
     mpz_clear(N);
+
+    return 0;
 }
