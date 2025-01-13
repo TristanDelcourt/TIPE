@@ -12,3 +12,4 @@ typedef system_s* system_t;
 
 system_t init_gauss(int** v, int n1, int n2);
 void gaussian_step(system_t s);
+void free_system(system_t s);

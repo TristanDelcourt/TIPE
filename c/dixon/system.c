@@ -109,7 +109,10 @@ void iter_sol(system_t s){
         s->sol[i] = 0;
         i++;   
     }
-    if(i >= s->n2) s->done = true;
+    if(i >= s->n2){
+        s->done = true;
+        return;
+    }
     s->sol[i] = 1;
 }
 
@@ -161,75 +164,12 @@ void gaussian_step(system_t s){
     }
 }
 
-/*
-void gaussian_solve(int* sol, int** v, int n1, int n2, int* arbitrary_indices, int* len){
-    printf("Initial vectors\n");
-    print_ll(v, n1, n2);
-    
-    system_t m = transpose(v, n1, n2);
-
-    printf("Transposed\n");
-    print_ll(m, n2, n1);
-    
-    for(int i = 0; i<n2; i++){
-        mod_vect(m[i], 2, n1);
+void free_system(system_t s){
+    for(int i = 0; i<s->n1; i++){
+        free(s->m[i]);
     }
-
-    printf("Modded\n");
-    print_ll(m, n2, n1);
-
-    triangulate(m, n1, n2);
-    
-    printf("Triangulate\n");
-    print_ll(m, n2, n1);
-
-    for(int i = 0; i<n1; i++){
-        sol[i] = -1;
-    }
-
-    printf("%d\n", get_arbitary(m, n1, n2));
-    exit(1);
-
-    //arbitrary_indices = malloc(n1*sizeof(int));
-    //int nb_arb = 0;
-
-
-    for(int i = n2-1; i>-1; i--){
-        int j = 0;
-        while(j < n1 && !m[i][j]){
-            j++;
-        }
-
-        if(j<n1){
-            sol[j] = 0;
-
-            for(int k = n1-1; k>j; k--){
-                if(sol[k] == -1){
-                    //arbitrary_indices[nb_arb++] = k;
-                    //sol[k] = 0;
-                    sol[k] = rand() % 2;
-                }
-                sol[j] -= m[i][k] * sol[k];
-                sol[j] = abs(sol[j]) % 2;
-            }
-        }
-    }
-
-    
-    for(int i = 0; i<n1; i++){
-        if(sol[i] == -1){
-            //arbitrary_indices[nb_arb++] = i;
-            //sol[i] = 0;
-            sol[i] = rand() % 2;
-        }
-    }
-
-    
-    arbitrary_indices = realloc(arbitrary_indices, nb_arb*sizeof(int));
-    print_list(arbitrary_indices, nb_arb);
-    *len = nb_arb;
-    
-
-    free_ll(m, n2, n1);
+    free(s->m);
+    free(s->sol);
+    free(s->perm);
+    free(s);
 }
-*/

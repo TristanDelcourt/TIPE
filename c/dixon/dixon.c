@@ -165,9 +165,6 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
         
         v[i] = vi;
         mpz_set(z[i], zi);
-        //gmp_printf("%Zd\n", z[i]);
-        //print_list(vi, pb_len);
-        //printf("\n\n");
     }
     printf("\n");
 
@@ -177,20 +174,6 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
     return v;
 }
 
-/*
-bool gen_solutions(int* sol, int* indices, int n){
-    int i = 0;
-    while(i<n && (sol[indices[i]] == 1)){
-        sol[indices[i]] = 0;
-        i++;   
-    }
-    if(i >= n){
-        return true;
-    }
-    sol[indices[i]] = 1;
-    return false;
-}
-*/
 
 void dixon(mpz_t N, int B, int extra){
     int piB = pi(B);
@@ -212,17 +195,14 @@ void dixon(mpz_t N, int B, int extra){
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Time to get zi: %fs\n", time_spent);
-
-    //int* arbitrary_indices;
-    //int len;
     
     mpz_t f1, f2, Z1, Z2;
     mpz_inits(f1, f2, Z1, Z2, NULL);
     
     //gaussian init
     system_t s = init_gauss(v, pb_len+extra, pb_len);
+    printf("2^%d solutions to iterate\n", s->n2 - s->arb);
     int* sum = malloc(pb_len*sizeof(int));
-
 
     bool done = false;
     while(!done){
@@ -248,11 +228,12 @@ void dixon(mpz_t N, int B, int extra){
 
         if(s->done){
             fprintf(stderr, "ERROR: no solution for this set of zi\n");
-            exit(1);
+            done = true;
         }
     }
     free(sum);
     free(pb);
+    free_system(s);
     free_ll(v, pb_len+extra, pb_len);
     for(int i = 0; i < pb_len+extra; i++){
         mpz_clear(z[i]);
@@ -272,7 +253,7 @@ int main(int argc, char**argv){
     assert(argc == 2);
     srand(time(NULL));
 
-    int B = 10000;
+    int B = 1000;
     mpz_t N;
     mpz_init_set_str(N, argv[1], 10);
 
