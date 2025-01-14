@@ -4,7 +4,11 @@
 #include <inttypes.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 FILE* open_file(char** filename_parts, int n, int max_size, char* type){
     char* file_name = malloc(max_size*sizeof(char));
@@ -15,6 +19,49 @@ FILE* open_file(char** filename_parts, int n, int max_size, char* type){
     FILE* f = fopen(file_name, type);
     free(file_name);
     return f;
+}
+
+void test_dixon_b_values(int start, int end, int step){
+    char* file = "/home/idle/Work/TIPE/c/dixon/bin/dixon";
+    char* arg1 = malloc(50*sizeof(char));
+    arg1[0] = '\0';
+
+    char* file_name_pt2 = malloc(50*sizeof(char));
+    file_name_pt2[0] = '6';
+    file_name_pt2[1] = '\0';
+    char* argv[3] = {"./products/", file_name_pt2, "_digit_products.txt"};
+    FILE* f = open_file(argv, 3, 150, "r");
+    if (f == NULL) {
+        fprintf(stderr, "Failed to open file\n");
+        return;
+    }
+
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    int status = 0;
+    while ((read = getline(&line, &len, f)) != -1) {
+        line[read-1] = '\0';
+        arg1[0] = '\0';
+        strcat(arg1, line);
+
+        pid_t pid = fork();
+        if(pid == 0){
+            int error = execl(file, "dixon", "1", arg1, NULL);
+            if(error == -1){
+                fprintf(stderr, "ERROR: Could not execute command\n: %s %s\n", file, arg1);
+                exit(EXIT_FAILURE);
+            }
+        }
+        struct timeval begin, end;
+        gettimeofday(&begin, 0);
+        pid = wait(&status);
+        gettimeofday(&end, 0);
+        long seconds = end.tv_sec - begin.tv_sec;
+        long microseconds = end.tv_usec - begin.tv_usec;
+        double elapsed = seconds + microseconds*1e-6;
+        printf("n = %s / Time measured: %f seconds. / %d\n", line, elapsed, WEXITSTATUS(status));
+    }
 }
 
 void create_products(int ndigit, int nb_tests){
@@ -106,15 +153,22 @@ void parse_primelist(char* source){
 
 int main(int argc, char** argv){
     srand(time(NULL));
-    if(argc>=3){
-        bool recompute = atoi(argv[2]);
+    if(argc>=2){
+        bool recompute = atoi(argv[1]);
         if(recompute) parse_primelist("someprimes.txt");
     }
 
-    int nb_tests = atoi(argv[1]);
-    for(int i = 2; i<9; i++){
-        create_products(i, nb_tests);
+    if(argc>=2){
+        bool recompute = atoi(argv[2]);
+        if(recompute){
+            int nb_tests = atoi(argv[3]);
+            for(int i = 2; i<9; i++){
+                create_products(i, nb_tests);
+            }
+        }
     }
+
+    test_dixon_b_values(0, 0, 0);
 
     return 0;
 }

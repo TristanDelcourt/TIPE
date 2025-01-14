@@ -78,7 +78,6 @@ int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
         }
     }
 
-    printf("base reduction %f%%\n", (float)j/piB*100);
     *pb_len = j;
     pb = realloc(pb, j*sizeof(int));
     
@@ -128,7 +127,7 @@ bool factorise(mpz_t n, int* v, int pb_len, int* pb){
     return false;
 }
 
-int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
+int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     //ceil(sqrt(n))
     mpz_t sqrt_n;
     mpz_init(sqrt_n);
@@ -159,14 +158,16 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
 
             mpz_add_ui(x, x, 1);
         }
-        printf("\r");
-        printf("%f%%", (float)i/(pb_len+extra-1)*100);
-        fflush(stdout);
+        if(!tests){
+            printf("\r");
+            printf("%f%%", (float)i/(pb_len+extra-1)*100);
+            fflush(stdout);
+        }
         
         v[i] = vi;
         mpz_set(z[i], zi);
     }
-    printf("\n");
+    if(!tests) printf("\n");
 
     mpz_clears(sqrt_n, zi, x, qx, NULL);
 
@@ -175,13 +176,14 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra){
 }
 
 
-void dixon(mpz_t N, int B, int extra){
+void dixon(mpz_t N, int B, int extra, bool tests){
     int piB = pi(B);
-    printf("pi(B) = %d\n", piB);
+    if(!tests) printf("pi(B) = %d\n", piB);
     int* p = primes(piB, B);
 
     int pb_len;
     int* pb = prime_base(N, &pb_len, p, piB);
+    if(!tests) printf("base reduction %f%%\n", (float)pb_len/piB*100);
     free(p);
 
     mpz_t* z = malloc((pb_len+extra)*sizeof(mpz_t));
@@ -191,17 +193,17 @@ void dixon(mpz_t N, int B, int extra){
     
     //Getting zis
     clock_t t1 = clock();
-    int** v = get_all_zi(z, N, pb_len, pb, extra);
+    int** v = get_all_zi(z, N, pb_len, pb, extra, tests);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
-    printf("Time to get zi: %fs\n", time_spent);
+    if(!tests) printf("Time to get zi: %fs\n", time_spent);
     
     mpz_t f1, f2, Z1, Z2;
     mpz_inits(f1, f2, Z1, Z2, NULL);
     
     //gaussian init
     system_t s = init_gauss(v, pb_len+extra, pb_len);
-    printf("2^%d solutions to iterate\n", s->n2 - s->arb);
+    //printf("2^%d solutions to iterate\n", s->n2 - s->arb);
     int* sum = malloc(pb_len*sizeof(int));
 
     bool done = false;
@@ -227,7 +229,7 @@ void dixon(mpz_t N, int B, int extra){
         }
 
         if(s->done){
-            fprintf(stderr, "ERROR: no solution for this set of zi\n");
+            if(!tests) fprintf(stderr, "ERROR: no solution for this set of zi\n");
             exit(1);
         }
     }
@@ -240,7 +242,7 @@ void dixon(mpz_t N, int B, int extra){
     }
     free(z);
 
-    gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", N, f1, N, f2);
+    if(!tests) gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", N, f1, N, f2);
 
     assert(mpz_divisible_p(N, f1));
     assert(mpz_divisible_p(N, f2));
@@ -250,18 +252,19 @@ void dixon(mpz_t N, int B, int extra){
 
 
 int main(int argc, char**argv){
-    assert(argc == 2);
+    assert(argc == 3);
     srand(time(NULL));
 
+    bool tests = atoi(argv[1]);
     int B = 1000;
     mpz_t N;
-    mpz_init_set_str(N, argv[1], 10);
+    mpz_init_set_str(N, argv[2], 10);
 
     clock_t t1 = clock();
-    dixon(N, B, 5);
+    dixon(N, B, 5, tests);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
-    printf("Total time: %fs\n", time_spent);
+    if(!tests) printf("Total time: %fs\n", time_spent);
 
     mpz_clear(N);
 
