@@ -228,7 +228,7 @@ void dixon(mpz_t N, int B, int extra){
 
         if(s->done){
             fprintf(stderr, "ERROR: no solution for this set of zi\n");
-            done = true;
+            exit(1);
         }
     }
     free(sum);
