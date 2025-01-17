@@ -21,48 +21,90 @@ FILE* open_file(char** filename_parts, int n, int max_size, char* type){
     return f;
 }
 
-void test_dixon_b_values(int start, int end, int step){
+void test_dixon_b_values(int start, int end, int step, int digits){
     char* file = "/home/idle/Work/TIPE/c/dixon/bin/dixon";
-    char* arg1 = malloc(50*sizeof(char));
-    arg1[0] = '\0';
+    char* number = malloc(50*sizeof(char));
+    char* b_value = malloc(50*sizeof(char));
+    number[0] = '\0';
 
     char* file_name_pt2 = malloc(50*sizeof(char));
-    file_name_pt2[0] = '6';
-    file_name_pt2[1] = '\0';
+    sprintf(file_name_pt2, "%d", digits);
     char* argv[3] = {"./products/", file_name_pt2, "_digit_products.txt"};
-    FILE* f = open_file(argv, 3, 150, "r");
-    if (f == NULL) {
-        fprintf(stderr, "Failed to open file\n");
-        return;
-    }
-
+    
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
-    int status = 0;
-    while ((read = getline(&line, &len, f)) != -1) {
-        line[read-1] = '\0';
-        arg1[0] = '\0';
-        strcat(arg1, line);
+    int status;
 
-        pid_t pid = fork();
-        if(pid == 0){
-            int error = execl(file, "dixon", "1", arg1, NULL);
-            if(error == -1){
-                fprintf(stderr, "ERROR: Could not execute command\n: %s %s\n", file, arg1);
-                exit(EXIT_FAILURE);
-            }
+    int n_tests = (end-start)/step + 1;
+    double* averages = malloc(n_tests*sizeof(double));
+    float* success_rates = malloc(n_tests*sizeof(double));
+    int i = 0;
+    for(int b = start; b<=end; b+=step){
+        printf("=====================\nB = %d\n=====================\n", b);
+
+        double average = 0;
+        float success_rate = 0;
+        FILE* f = open_file(argv, 3, 150, "r");
+        if (f == NULL) {
+            fprintf(stderr, "Failed to open file\n");
+            return;
         }
-        struct timeval begin, end;
-        gettimeofday(&begin, 0);
-        pid = wait(&status);
-        gettimeofday(&end, 0);
-        long seconds = end.tv_sec - begin.tv_sec;
-        long microseconds = end.tv_usec - begin.tv_usec;
-        double elapsed = seconds + microseconds*1e-6;
-        printf("n = %s / Time measured: %f seconds. / %d\n", line, elapsed, WEXITSTATUS(status));
+
+        int n_lines = 0;
+        while ((read = getline(&line, &len, f)) != -1) {
+            n_lines++;
+            line[read-1] = '\0';
+            number[0] = '\0';
+            sprintf(b_value, "%d", b);
+            strcat(number, line);
+
+            printf("n = %s", line);
+            fflush(stdout);
+            pid_t pid = fork();
+            if(pid == 0){
+                int error = execl(file, "dixon", "1", number, b_value, NULL);
+                if(error == -1){
+                    fprintf(stderr, "ERROR: Could not execute command\n: '%s %s %s'\n", file, number, b_value);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            struct timeval begin, end;
+            gettimeofday(&begin, 0);
+            pid = wait(&status);
+            gettimeofday(&end, 0);
+            long seconds = end.tv_sec - begin.tv_sec;
+            long microseconds = end.tv_usec - begin.tv_usec;
+            double elapsed = seconds + microseconds*1e-6;
+            average += elapsed;
+            if(WEXITSTATUS(status) == 0){
+                success_rate += 1.0;
+            }
+            printf(" / %fs / %d\n", elapsed, WEXITSTATUS(status));
+        }
+        fclose(f);
+
+        averages[i] = average/n_lines;
+        success_rates[i] =  success_rate/n_lines;
+        i++;
     }
+
+    printf("=====================\n=====================\n");
+
+    int b = start;
+    for(int i = 0; i<n_tests; i++ ){
+        printf("Avg: b=%d -> %fs / %.1f%%\n", b, averages[i], success_rates[i]*100);
+        b+=step;
+    }
+    
+    free(averages);
+    free(file_name_pt2);
+    free(number);
+    free(b_value);
+    free(line);
 }
+
+
 
 void create_products(int ndigit, int nb_tests){
     char* file_name_pt2 = malloc(50*sizeof(char));
@@ -158,7 +200,7 @@ int main(int argc, char** argv){
         if(recompute) parse_primelist("someprimes.txt");
     }
 
-    if(argc>=2){
+    if(argc>=4){
         bool recompute = atoi(argv[2]);
         if(recompute){
             int nb_tests = atoi(argv[3]);
@@ -167,8 +209,15 @@ int main(int argc, char** argv){
             }
         }
     }
+    /*
+    6 digit products
+    Avg: b=250 -> 1.409920s / 100.0%
+    Avg: b=260 -> 1.687535s / 100.0%
+    Avg: b=270 -> 1.706647s / 100.0%
+    Avg: b=280 -> 1.876258s / 100.0%
+    */
 
-    test_dixon_b_values(0, 0, 0);
+    test_dixon_b_values(600, 600, 10, 6);
 
     return 0;
 }

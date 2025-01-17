@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -g -DNDEBUG
+CFLAGS := -Wall -Wextra -g
 DIR := ./bin
 
 all: dixon

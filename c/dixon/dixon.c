@@ -51,6 +51,7 @@ int* primes(int piB, int B){
 
 }
 
+/* Used for legendre symbol, exists in gmp already
 bool euler_criterion(mpz_t n, int p){
     int e = (p-1)/2;
     mpz_t r, p1;
@@ -59,29 +60,27 @@ bool euler_criterion(mpz_t n, int p){
     mpz_powm_ui(r, n, e, p1);
     return(mpz_cmp_ui(r, 1) == 0);
 }
+*/
 
 int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
     int* pb = malloc(piB*sizeof(int));
     pb[0] = 2;
 
     int j = 1;
-    mpz_t r, p1;
-    mpz_inits(r, p1, NULL);
+    mpz_t p1;
+    mpz_init(p1);
     for(int i = 1; i<piB; i++){
-        int e = (primes[i]-1)/2;
         mpz_set_ui(p1, primes[i]);
-        mpz_powm_ui(r, n, e, p1);
-        if(mpz_cmp_ui(r, 1) == 0){
-            //printf("%d %d\n", primes[i], j);
+        if(mpz_legendre(n, p1) == 1){
+            //printf("%d\n", primes[i]);
             pb[j] = primes[i];
             j++;
         }
     }
-
     *pb_len = j;
     pb = realloc(pb, j*sizeof(int));
     
-    mpz_clears(r, p1, NULL);
+    mpz_clear(p1);
     return pb;
 }
 
@@ -115,31 +114,29 @@ bool factorise(mpz_t n, int* v, int pb_len, int* pb){
         v[i] = 0;
     }
     
-    for(int i = 0; i<pb_len && mpz_cmp_ui(n, 1); i++){
+    for(int i = 0; i<pb_len && (mpz_cmp_ui(n, 1) != 0); i++){
         while (mpz_divisible_ui_p(n, pb[i])){
             v[i]++;
             mpz_divexact_ui(n, n, pb[i]);
         }
     }
 
-    if(!mpz_cmp_ui(n, 1))
+    if(mpz_cmp_ui(n, 1) == 0)
         return true;
     return false;
 }
 
 int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     //ceil(sqrt(n))
-    mpz_t sqrt_n;
-    mpz_init(sqrt_n);
-    mpz_root(sqrt_n, N, 2);
-    mpz_add_ui(sqrt_n, sqrt_n, 1);
-
-    mpz_t x;
-    mpz_init_set_ui(x, 1);
+    mpz_t sqrt_N;
+    mpz_init(sqrt_N);
+    mpz_sqrt(sqrt_N, N);
+    mpz_add_ui(sqrt_N, sqrt_N, 1);
 
     mpz_t zi;
+    mpz_init_set(zi, sqrt_N);
     mpz_t qx;
-    mpz_inits(zi, qx, NULL);
+    mpz_init(qx);
 
     int** v = malloc((pb_len+extra)*sizeof(int*));
 
@@ -148,15 +145,13 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
         int* vi = malloc(pb_len*sizeof(int));
 
         while(!found){
-            mpz_add(zi, sqrt_n, x);            
+            mpz_add_ui(zi, zi, 1);
 
             //Q(x)
             mpz_mul(qx, zi, zi);
             mpz_sub(qx, qx, N);
 
             found = factorise(qx, vi, pb_len, pb);
-
-            mpz_add_ui(x, x, 1);
         }
         if(!tests){
             printf("\r");
@@ -169,7 +164,7 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     }
     if(!tests) printf("\n");
 
-    mpz_clears(sqrt_n, zi, x, qx, NULL);
+    mpz_clears(sqrt_N, zi, qx, NULL);
 
 
     return v;
@@ -185,6 +180,10 @@ void dixon(mpz_t N, int B, int extra, bool tests){
     int* pb = prime_base(N, &pb_len, p, piB);
     if(!tests) printf("base reduction %f%%\n", (float)pb_len/piB*100);
     free(p);
+    /*
+    int* pb = p;
+    int pb_len = piB;
+    */
 
     mpz_t* z = malloc((pb_len+extra)*sizeof(mpz_t));
     for(int i = 0; i < pb_len+extra; i++){
@@ -252,16 +251,16 @@ void dixon(mpz_t N, int B, int extra, bool tests){
 
 
 int main(int argc, char**argv){
-    assert(argc == 3);
+    assert(argc == 4);
     srand(time(NULL));
 
     bool tests = atoi(argv[1]);
-    int B = 1000;
+    int B = atoi(argv[3]);
     mpz_t N;
     mpz_init_set_str(N, argv[2], 10);
 
     clock_t t1 = clock();
-    dixon(N, B, 5, tests);
+    dixon(N, B, 1, tests);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!tests) printf("Total time: %fs\n", time_spent);
