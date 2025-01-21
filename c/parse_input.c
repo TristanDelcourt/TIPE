@@ -29,44 +29,52 @@ bool valid_int(char* str){
 
 input_t* parse_input(int argc, char** argv){
     input_t* input = init_input();
-    for(int i = 1; i<argc-1; i++){
+
+    int i = 1;
+    while(i<argc){
         if(strcmp(argv[i], "-b") == 0){
-            if(i+1<argc){
-                if(valid_int(argv[i+1])) input->bound = atoi(argv[i+1]);
+            i++;
+            if(i<argc){
+                if(valid_int(argv[i])) input->bound = atoi(argv[i]);
                 else return NULL;}
             else return NULL;
         }
 
         else if(strcmp(argv[i], "-s") == 0){
-            if(i+1<argc){
-                if(valid_int(argv[i+1])) input->sieving_interval = atoi(argv[i+1]);
+            i++;
+            if(i<argc){
+                if(valid_int(argv[i])) input->sieving_interval = atoi(argv[i]);
                 else return NULL;}
             else return NULL;
         }
         
         else if(strcmp(argv[i], "-e") == 0){
-            if(i+1<argc){
-                if(valid_int(argv[i+1])) input->extra = atoi(argv[i+1]);
+            i++;
+            if(i<argc){
+                if(valid_int(argv[i])) input->extra = atoi(argv[i]);
                 else return NULL;}
             else return NULL;
         }
 
         else if(strcmp(argv[i], "-n") == 0){
-            if(i+1<argc){
-                if(valid_int(argv[i+1])) mpz_set_str(input->N, argv[i+1], 10);
+            i++;
+            if(i<argc){
+                if(valid_int(argv[i])) mpz_set_str(input->N, argv[i], 10);
                 else return NULL;}
             else return NULL;
         }
 
         else if(strcmp(argv[i], "-o") == 0){
-            if(i+1<argc) input->output_file = argv[i+1];
+            i++;
+            if(i<argc) input->output_file = argv[i];
             else return NULL;
-        }
+ }
 
         else if(strcmp(argv[i], "-t") == 0){
-            if(i+1<argc) {
-                if(strcmp(argv[i+1], "dixon")) input->algorithm = DIXON;
-                else if(strcmp(argv[i+1], "qsieve")) input->algorithm = QSIEVE;
+            i++;
+            if(i<argc) {
+                if(strcmp(argv[i], "dixon") == 0) input->algorithm = DIXON;
+                else if(strcmp(argv[i], "qsieve") == 0) input->algorithm = QSIEVE;
                 else return NULL;}
             else return NULL;
         }
@@ -76,6 +84,8 @@ input_t* parse_input(int argc, char** argv){
         }
 
         else return NULL;
+
+        i++;
     }
 
     return input;

@@ -15,14 +15,30 @@ vector.o: dir vector.c vector.h
 system.o: dir system.c system.h
 	$(CC) $(CFLAGS) -c system.c -o $(DIR)/system.o
 
-factor_base.o: dir factor_base.c factor_base.h
-	$(CC) $(CFLAGS) -c factor_base.c -o $(DIR)/factor_base.o
+factorbase.o: dir factorbase.c factorbase.h
+	$(CC) $(CFLAGS) -c factorbase.c -o $(DIR)/factorbase.o
 
 parse_input.o: dir parse_input.c parse_input.h
 	$(CC) $(CFLAGS) -c parse_input.c -o $(DIR)/parse_input.o
 
-factor: dir %.o
-	$(CC) $(CFLAGS) factor.c $(DIR)/*.o -o $(DIR)/factor -lgmp
+# Algorithms
+
+qsieve.o:
+	$(CC) $(CFLAGS) -c ./qsieve/qsieve.c -o $(DIR)/qsieve.o
+
+dixon.o:
+	$(CC) $(CFLAGS) -c ./dixon/dixon.c -o $(DIR)/dixon.o
+
+factor: dir list_matrix_utils.o vector.o system.o factorbase.o parse_input.o qsieve.o dixon.o
+	$(CC) $(CFLAGS) main.c \
+		$(DIR)/list_matrix_utils.o \
+		$(DIR)/vector.o \
+		$(DIR)/system.o \
+		$(DIR)/factorbase.o \
+		$(DIR)/parse_input.o \
+		$(DIR)/qsieve.o \
+		$(DIR)/dixon.o \
+		 -o $(DIR)/factor -lgmp
 
 # clean
 clean:

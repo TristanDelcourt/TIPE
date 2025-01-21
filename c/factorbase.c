@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <gmp.h>
+#include <stdlib.h>
 
 bool is_prime(int n) { 
     // Corner cases 

@@ -1,3 +1,4 @@
+#pragma once
 #include <gmp.h>
 #include <stdbool.h>
 
