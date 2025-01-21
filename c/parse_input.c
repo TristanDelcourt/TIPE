@@ -1,6 +1,7 @@
 #include "parse_input.h"
 #include <stdlib.h>
 #include <string.h>
+#include <gmp.h>
 #include <stdbool.h>
 
 input_t* init_input(void){
@@ -8,6 +9,8 @@ input_t* init_input(void){
     input->bound = -1;
     input->output_file = NULL;
     input->sieving_interval = -1;
+    mpz_init_set_ui(input->N, 0);
+    return input;
 }
 
 bool valid_int(char* str){
@@ -23,22 +26,34 @@ bool valid_int(char* str){
 
 input_t* parse_input(int argc, char** argv){
     input_t* input = init_input();
-    for(int i = 1; i<argc; i++){
+    for(int i = 1; i<argc-1; i++){
         if(strcmp(argv[i], "-b") == 0){
-            if(i+1<argc) {
+            if(i+1<argc){
                 if(valid_int(argv[i+1])) input->bound = atoi(argv[i+1]);
                 else return NULL;}
             else return NULL;
         }
 
         else if(strcmp(argv[i], "-s") == 0){
-            if(i+1<argc) {
+            if(i+1<argc){
                 if(valid_int(argv[i+1])) input->sieving_interval = atoi(argv[i+1]);
                 else return NULL;}
             else return NULL;
         }
 
+        else if(strcmp(argv[i], "-n") == 0){
+            if(i+1<argc){
+                if(valid_int(argv[i+1])) input->sieving_interval = mpz_set_str(input->N, argv[i+1], 10);
+                else return NULL;}
+            else return NULL;
+        }
+
         else if(strcmp(argv[i], "-o") == 0){
+            if(i+1<argc) input->output_file = argv[i+1];
+            else return NULL;
+        }
+
+        else if(strcmp(argv[i], "-t") == 0){
             if(i+1<argc) input->output_file = argv[i+1];
             else return NULL;
         }
