@@ -2,6 +2,28 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+bool vectorize(mpz_t n, int* v, int pb_len, int* pb){
+    /** Attemps naive factorisation to 'n' with the primes in
+     * the prime base 'pb' and putting the result into 'v', vector of powers of
+     * the primes in the prime base
+     * If it succeeds, returns true, otherwise, returns false
+    */
+    for(int i = 0; i<pb_len; i++){
+        v[i] = 0;
+    }
+    
+    for(int i = 0; i<pb_len && (mpz_cmp_ui(n, 1) != 0); i++){
+        while (mpz_divisible_ui_p(n, pb[i])){
+            v[i]++;
+            mpz_divexact_ui(n, n, pb[i]);
+        }
+    }
+
+    if(mpz_cmp_ui(n, 1) == 0)
+        return true;
+    return false;
+}
+
 int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     /** Gets pb_len+extra zis such that their product will simplify our searach of
      * a B-smooth relation, definied at:
@@ -34,7 +56,7 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
             mpz_mul(qx, zi, zi);
             mpz_sub(qx, qx, N);
 
-            found = factorise(qx, vi, pb_len, pb);
+            found = vectorize(qx, vi, pb_len, pb);
         }
         if(!tests){
             printf("\r");

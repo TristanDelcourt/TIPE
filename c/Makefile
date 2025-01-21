@@ -2,7 +2,7 @@ CC := gcc
 CFLAGS := -Wall -Wextra -g
 DIR := ./bin
 
-all: dixon
+all: factor
 dir:
 	@mkdir -p $(DIR)
 
@@ -15,9 +15,14 @@ vector.o: dir vector.c vector.h
 system.o: dir system.c system.h
 	$(CC) $(CFLAGS) -c system.c -o $(DIR)/system.o
 
-dixon: dir dixon.c system.o vector.o list_matrix_utils.o
-	$(CC) $(CFLAGS) dixon.c $(DIR)/list_matrix_utils.o $(DIR)/vector.o $(DIR)/system.o -o $(DIR)/dixon -lgmp
+factor_base.o: dir factor_base.c factor_base.h
+	$(CC) $(CFLAGS) -c factor_base.c -o $(DIR)/factor_base.o
 
+parse_input.o: dir parse_input.c parse_input.h
+	$(CC) $(CFLAGS) -c parse_input.c -o $(DIR)/parse_input.o
+
+factor: dir %.o
+	$(CC) $(CFLAGS) factor.c $(DIR)/*.o -o $(DIR)/factor -lgmp
 
 # clean
 clean:

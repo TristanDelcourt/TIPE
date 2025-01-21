@@ -5,8 +5,11 @@
 #include "system.h"
 #include "parse_input.h"
 
+// Include aglorithms
+#include "./qsieve/qsieve.h"
 
-void factor(mpz_t N, int B, int extra, bool tests){
+
+void factor(mpz_t N, int B, int extra, bool tests, TYPE algorithm){
     int piB = pi(B);
     if(!tests) printf("pi(B) = %d\n", piB);
     int* p = primes(piB, B);
@@ -26,8 +29,16 @@ void factor(mpz_t N, int B, int extra, bool tests){
     }
     
     //Getting zis
+    int** v;
     clock_t t1 = clock();
-    int** v = dixon(z, N, pb_len, pb, extra, tests);
+    switch(algorithm){
+        case DIXON:
+            printf(stderr, "ERROR: not done\n");
+            break;
+        case QSIEVE:
+            v = qsieve(z, N, pb_len, pb, extra, tests);
+            break;
+    }
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!tests) printf("Time to get zi: %fs\n", time_spent);
@@ -86,11 +97,27 @@ void factor(mpz_t N, int B, int extra, bool tests){
 
 int main(int argc, char** argv){
     input_t* input = parse_input(argc, argv);
-    if(mpz_cmp_ui(input->N, 0) == 0){
+    if(input==NULL){
+        printf(stderr, "ERROR: Invalid input\n");
         return 1;
     }
-    if(input->bound == -1) input->bound = 500;
-    if(input->sieving_interval == -1) input->bound = 1000;
 
-    factor()
+    if(mpz_cmp_ui(input->N, 0) == 0){
+        printf(stderr, "ERROR: No input number, use -n %%number%%\n");
+        return 1;
+    }
+
+    if(input->bound == -1) input->bound = 500;
+    if(input->sieving_interval == -1) input->sieving_interval = 1000;
+    if(input->extra == -1) input->extra = 1;
+
+    factor(
+        input->N,
+        input->bound,
+        input->extra,
+        input->quiet,
+        input->algorithm
+    );
+
+    return 0;
 }

@@ -9,6 +9,9 @@ input_t* init_input(void){
     input->bound = -1;
     input->output_file = NULL;
     input->sieving_interval = -1;
+    input->extra = -1;
+    input->quiet = false;
+    input->algorithm = DEFAULT;
     mpz_init_set_ui(input->N, 0);
     return input;
 }
@@ -40,10 +43,17 @@ input_t* parse_input(int argc, char** argv){
                 else return NULL;}
             else return NULL;
         }
+        
+        else if(strcmp(argv[i], "-e") == 0){
+            if(i+1<argc){
+                if(valid_int(argv[i+1])) input->extra = atoi(argv[i+1]);
+                else return NULL;}
+            else return NULL;
+        }
 
         else if(strcmp(argv[i], "-n") == 0){
             if(i+1<argc){
-                if(valid_int(argv[i+1])) input->sieving_interval = mpz_set_str(input->N, argv[i+1], 10);
+                if(valid_int(argv[i+1])) mpz_set_str(input->N, argv[i+1], 10);
                 else return NULL;}
             else return NULL;
         }
@@ -54,8 +64,15 @@ input_t* parse_input(int argc, char** argv){
         }
 
         else if(strcmp(argv[i], "-t") == 0){
-            if(i+1<argc) input->output_file = argv[i+1];
+            if(i+1<argc) {
+                if(strcmp(argv[i+1], "dixon")) input->algorithm = DIXON;
+                else if(strcmp(argv[i+1], "qsieve")) input->algorithm = QSIEVE;
+                else return NULL;}
             else return NULL;
+        }
+
+        else if(strcmp(argv[i], "-q") == 0){
+            input->quiet = true;
         }
 
         else return NULL;
