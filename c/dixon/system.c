@@ -135,8 +135,8 @@ system_t init_gauss(int** v, int n1, int n2){
 
     triangulate(s);
     
-    //printf("Triangulated\n");
-    //print_ll(s->m, s->n1, s->n2);
+    printf("Triangulated\n");
+    print_ll(s->m, s->n1, s->n2);
 
     get_arbitary(s);
     init_sol(s);

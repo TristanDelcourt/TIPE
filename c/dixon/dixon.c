@@ -29,7 +29,9 @@ bool is_prime(int n) {
     return true; 
 } 
   
-int pi(int n) { 
+int pi(int n) {
+    // calculates pi(n), the number of prime numbers <= n
+
     int k = 0;
     for (int i = 2; i <= n; i++) { 
         if (is_prime(i)) 
@@ -39,6 +41,8 @@ int pi(int n) {
 } 
 
 int* primes(int piB, int B){
+    // returns a list of piB first primes
+
     int* p = malloc(piB*sizeof(int));
     int k = 0;
     for (int i = 2; i <= B; i++) { 
@@ -63,6 +67,12 @@ bool euler_criterion(mpz_t n, int p){
 */
 
 int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
+    /** Reduces the factor base of the algorithm, refer to:
+     * Quadratic sieve factorisation algorithm
+     * Bc. Ondˇrej Vladyka
+     * Section 2.3.1 (p.16)
+    */
+
     int* pb = malloc(piB*sizeof(int));
     pb[0] = 2;
 
@@ -70,7 +80,7 @@ int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
     mpz_t p1;
     mpz_init(p1);
     for(int i = 1; i<piB; i++){
-        mpz_set_ui(p1, primes[i]);
+        mpz_set_ui(p1, primes[i]);  
         if(mpz_legendre(n, p1) == 1){
             //printf("%d\n", primes[i]);
             pb[j] = primes[i];
@@ -86,6 +96,17 @@ int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
 
 
 void rebuild(mpz_t prod, int* v, int* primes, int n1){
+    /** Rebuilds the product of primes to the power of half
+     * the solution found by the gaussian solve
+
+     * EX:
+     * v = (1, 2, 3, 1)
+     * primes = [2, 3, 5, 7]
+     * prod = 2**1 * 3** 2 * 5**3 * 7**1
+     * returns prod
+     * 
+    */
+
     mpz_set_ui(prod, 1);
     mpz_t temp;
     mpz_init(temp);
@@ -97,6 +118,9 @@ void rebuild(mpz_t prod, int* v, int* primes, int n1){
 }
 
 void sum_lignes(int* sum, int** v, system_t s){
+    /** Sums the lines of vectors into 'sum' according the solution of the
+     * output of the system 's', such that each power is even
+     */
     for(int i = 0; i<s->n1; i++){
         sum[i] = 0;
     }
@@ -110,6 +134,11 @@ void sum_lignes(int* sum, int** v, system_t s){
 
 
 bool factorise(mpz_t n, int* v, int pb_len, int* pb){
+    /** Attemps naive factorisation to 'n' with the primes in
+     * the prime base 'pb' and putting the result into 'v', vector of powers of
+     * the primes in the prime base
+     * If it succeeds, returns true, otherwise, returns false
+    */
     for(int i = 0; i<pb_len; i++){
         v[i] = 0;
     }
@@ -127,6 +156,13 @@ bool factorise(mpz_t n, int* v, int pb_len, int* pb){
 }
 
 int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
+    /** Gets pb_len+extra zis such that their product will simplify our searach of
+     * a B-smooth relation, definied at:
+     * Quadratic sieve factorisation algorithm
+     * Bc. Ondˇrej Vladyka
+     * Definition 1.11 (p.5)
+     */
+
     //ceil(sqrt(n))
     mpz_t sqrt_N;
     mpz_init(sqrt_N);
@@ -170,20 +206,21 @@ int** get_all_zi(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     return v;
 }
 
-
 void dixon(mpz_t N, int B, int extra, bool tests){
+    /** Dixon's factorization algorithm */
+
     int piB = pi(B);
     if(!tests) printf("pi(B) = %d\n", piB);
     int* p = primes(piB, B);
 
+    /*
     int pb_len;
     int* pb = prime_base(N, &pb_len, p, piB);
     if(!tests) printf("base reduction %f%%\n", (float)pb_len/piB*100);
     free(p);
-    /*
+    */
     int* pb = p;
     int pb_len = piB;
-    */
 
     mpz_t* z = malloc((pb_len+extra)*sizeof(mpz_t));
     for(int i = 0; i < pb_len+extra; i++){
@@ -202,7 +239,7 @@ void dixon(mpz_t N, int B, int extra, bool tests){
     
     //gaussian init
     system_t s = init_gauss(v, pb_len+extra, pb_len);
-    //printf("2^%d solutions to iterate\n", s->n2 - s->arb);
+    if(!tests) printf("2^%d solutions to iterate\n", s->n2 - s->arb);
     int* sum = malloc(pb_len*sizeof(int));
 
     bool done = false;
@@ -260,7 +297,7 @@ int main(int argc, char**argv){
     mpz_init_set_str(N, argv[2], 10);
 
     clock_t t1 = clock();
-    dixon(N, B, 1, tests);
+    dixon(N, B, 5, tests);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!tests) printf("Total time: %fs\n", time_spent);
