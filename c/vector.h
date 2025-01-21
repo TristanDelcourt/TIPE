@@ -1,3 +1,4 @@
+#pragma once
 #include <gmp.h>
 
 void mod_vect(int* v, int mod, int n1);

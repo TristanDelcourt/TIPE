@@ -10,7 +10,7 @@ typedef struct input_s {
     mpz_t N;
     bool quiet;
     TYPE algorithm;
-    int extra
+    int extra;
 } input_t;
 
 input_t* parse_input(int argc, char** argv);

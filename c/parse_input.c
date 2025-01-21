@@ -32,7 +32,7 @@ input_t* parse_input(int argc, char** argv){
 
     int i = 1;
     while(i<argc){
-        if(strcmp(argv[i], "-b") == 0){
+        if(strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "--bound") == 0){
             i++;
             if(i<argc){
                 if(valid_int(argv[i])) input->bound = atoi(argv[i]);
@@ -40,7 +40,7 @@ input_t* parse_input(int argc, char** argv){
             else return NULL;
         }
 
-        else if(strcmp(argv[i], "-s") == 0){
+        else if(strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--sieving_interval") == 0){
             i++;
             if(i<argc){
                 if(valid_int(argv[i])) input->sieving_interval = atoi(argv[i]);
@@ -48,7 +48,7 @@ input_t* parse_input(int argc, char** argv){
             else return NULL;
         }
         
-        else if(strcmp(argv[i], "-e") == 0){
+        else if(strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--extra") == 0){
             i++;
             if(i<argc){
                 if(valid_int(argv[i])) input->extra = atoi(argv[i]);
@@ -56,7 +56,7 @@ input_t* parse_input(int argc, char** argv){
             else return NULL;
         }
 
-        else if(strcmp(argv[i], "-n") == 0){
+        else if(strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--number") == 0){
             i++;
             if(i<argc){
                 if(valid_int(argv[i])) mpz_set_str(input->N, argv[i], 10);
@@ -70,7 +70,7 @@ input_t* parse_input(int argc, char** argv){
             else return NULL;
  }
 
-        else if(strcmp(argv[i], "-t") == 0){
+        else if(strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--type") == 0){
             i++;
             if(i<argc) {
                 if(strcmp(argv[i], "dixon") == 0) input->algorithm = DIXON;
@@ -79,7 +79,9 @@ input_t* parse_input(int argc, char** argv){
             else return NULL;
         }
 
-        else if(strcmp(argv[i], "-q") == 0){
+        else if(strcmp(argv[i], "-q") == 0 ||
+                strcmp(argv[i], "-stfu") == 0 /*easter egg*/ ||
+                strcmp(argv[i], "--quiet") == 0){
             input->quiet = true;
         }
 
