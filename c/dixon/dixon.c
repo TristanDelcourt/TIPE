@@ -42,6 +42,7 @@ int** dixon(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
     mpz_t zi;
     mpz_t zi_cpy;
     mpz_init_set(zi, sqrt_N);
+    mpz_init(zi_cpy);
 
     int** v = malloc((pb_len+extra)*sizeof(int*));
 
@@ -51,7 +52,8 @@ int** dixon(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
 
         while(!found){
             mpz_add_ui(zi, zi, 1);
-            mpz_set(zi_cpy, zi);
+            mpz_mul(zi_cpy, zi, zi);
+            mpz_mod(zi_cpy, zi_cpy, N);
 
             found = vectorize_dixon(zi_cpy, vi, pb_len, pb);
         }
