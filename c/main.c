@@ -10,7 +10,7 @@
 #include "factorbase.h"
 #include "list_matrix_utils.h"
 
-// Include aglorithms
+// Include algorithms
 #include "./dixon/dixon.h"
 #include "./qsieve/qsieve.h"
 
