@@ -2,7 +2,7 @@
 
 ## Presentation
 
-This repo gives possible implemtations of algorithms that are used to factor a large number into its prime factors. I have implemented 2 of those algorithms so far, these being:
+This repo gives possible implementations of algorithms that are used to factor a large number into its prime factors. I have implemented 2 of those algorithms so far, these being:
 
 * Dixon's algorithm
 * The quadritc sieve (unfinished)
@@ -11,7 +11,7 @@ You are able to use these algorithms from a single executable which I will prese
 
 ## General layout
 
-The main parts of the algorithms implemented as well as how to use them are as follows:
+The main parts of the algorithms implemented, as well as how to use them, are as follows:
 
 * [dixon/](./c/dixon)
     * [dixon.c](./c/dixon/dixon.c)
@@ -20,7 +20,7 @@ The main parts of the algorithms implemented as well as how to use them are as f
 * [Makefile](./c/Makefile)
 * [main.c](./c/main.c)
 
-In each algorithms' folder you can find the main part of how to find B-Smooth (defined in [1], page 5) relations according to that algorithm.
+In each algorithms' folder you can find the main part of how to find B-Smooth (defined in [[1](#sources)], page 5) relations according to that algorithm.
 
 ## Use of the algorithms
 
@@ -49,4 +49,4 @@ Set this command to diseable all prints (useful for testing the algorithm withou
 
 ## Sources
 
-[1] [Quadratic sieve factorization algorithm, Bc. Ondˇrej Vladyka](https://dspace.cvut.cz/bitstream/handle/10467/94585/F8-DP-2021-Vladyka-Ondrej-DP_Vladyka_Ondrej_2021.pdf?sequence=-1&isAllowed=y)
+[[1](https://dspace.cvut.cz/bitstream/handle/10467/94585/F8-DP-2021-Vladyka-Ondrej-DP_Vladyka_Ondrej_2021.pdf?sequence=-1&isAllowed=y)] Quadratic sieve factorization algorithm, Bc. Ondˇrej Vladyka
