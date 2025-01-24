@@ -59,7 +59,7 @@ void sum_lignes(int* sum, int** v, system_t s){
     }
 }
 
-void factor(mpz_t N, int B, int extra, bool quiet, TYPE algorithm){
+void factor(mpz_t N, int B, int extra, bool quiet, int sinterval, TYPE algorithm){
     int piB = pi(B);
     if(!quiet) printf("pi(B) = %d\n", piB);
     int* p = primes(piB, B);
@@ -96,10 +96,10 @@ void factor(mpz_t N, int B, int extra, bool quiet, TYPE algorithm){
             v = dixon(z, N, pb_len, pb, extra, quiet);
             break;
         case QSIEVE:
-            v = qsieve(z, N, pb_len, pb, extra, quiet);
+            v = qsieve(z, N, pb_len, pb, extra, sinterval, quiet);
             break;
         case DEFAULT:
-            v = qsieve(z, N, pb_len, pb, extra, quiet);
+            v = qsieve(z, N, pb_len, pb, extra, sinterval, quiet);
             break;
     }
     clock_t t2 = clock();
@@ -180,6 +180,7 @@ int main(int argc, char** argv){
         input->bound,
         input->extra,
         input->quiet,
+        input->sieving_interval,
         input->algorithm
     );
     clock_t t2 = clock();

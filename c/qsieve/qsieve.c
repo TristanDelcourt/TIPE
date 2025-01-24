@@ -100,32 +100,29 @@ void TonelliShanks(mpz_t a, int p, int* x1, int* x2){
     mpz_clears(y, p1, R, c, t, E, temp, b, NULL);
 }
 
-void solve_modular(mpz_t a, int p, mpz_t x1, mpz_t x2){
-    /** Finds solution to:
-     * x**2 = a mod p
-     */
-
-    int t = 0;
-    mpz_t temp, p1, a_cpy;
-    mpz_inits(temp, p1, a, NULL);
-    mpz_set_ui(p1, p);
-    mpz_mod_ui(a_cpy, a, p);
-    while(t<p){
-        mpz_set_ui(temp, t*t);
-        mpz_sub(temp, temp, a_cpy);
-        if(mpz_legendre(temp, p1) == -1){
-            break;
-        }
-        t++;
+float* prime_logs(int* pb, int pb_len){
+    float* plogs = malloc(pb_len*sizeof(float));
+    
+    for(int i = 0; i<pb_len; i++){
+        plogs[i] = log(pb[i]);
     }
-    int e = (p+1)/2;
-    mpz_set(x1, temp);
-    mpz_sqrt(x1, x1);
-    mpz_add_ui(x1, x1, t);
-    mpz_pow_ui(x1, x1, e);
-    mpz_sub(x2, x1, p1);
 
-    mpz_clears(temp, p1, NULL);
+    return plogs;
+}
+
+float calculate_threshhold(mpz_t N, mpz_t sqrt_N, int s, int loop_number, int* pb, int pb_len){
+    mpz_t qx;
+    mpz_init_set(qx, sqrt_N);
+    mpz_add_ui(qx, qx, s*loop_number);
+    mpz_mul(qx, qx, qx);
+    mpz_sub(qx, qx, N);
+    gmp_printf("%Zd %d\n", qx, pb[pb_len-1]);
+    mpz_div_ui(qx, qx, pb[pb_len-1]);
+
+    int temp = mpz_get_ui(qx);
+    printf("%d\n", temp);
+    double t = log(temp);
+    return t;
 }
 
 int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool tests){
@@ -148,14 +145,11 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
     mpz_init(qx);
 
     int** v = malloc((pb_len+extra)*sizeof(int*));
-
-    float* sinterval = malloc(s*sizeof(float));
-    for(int i = 0; i<s; i++){
-        sinterval[i] = 0;
+    for(int i = 0; i<pb_len+extra; i++){
+        v[i] = malloc(pb_len*sizeof(int));
     }
-    float t = /*sievingT hreshold = log(intervalStart2 − n) − log(maxF actor)*/ 1;
+    float* sinterval = malloc(s*sizeof(float));
     float* plogs = prime_logs(pb, pb_len);
-
     int  x1, x2;
 
     // TESTS
@@ -163,38 +157,66 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
     mpz_inits(temp, p1, NULL);
     // END TESTS
 
-    for(int i = 1; i < pb_len; i++){
-        mpz_add_ui(zi, zi, 1);
+    int loop_number = 0;
+    int relations_found = 0;
+    while(relations_found < pb_len + extra){
         
-        TonelliShanks(N, pb[i], &x1, &x2);
-        
-        // TESTS
-        mpz_set_ui(p1, pb[i]);
-        printf("x1=%d, x2=%d, p=%d\n", x1, x2, pb[i]);
-
-        mpz_ui_pow_ui(temp, x1, 2);
-        assert(mpz_congruent_p(temp, N, p1));
-
-        mpz_ui_pow_ui(temp, x2, 2);
-        assert(mpz_congruent_p(temp, N, p1));
-        // END TESTS
-        
-        while(x1<s){
-            sinterval[x1] += plogs[i];
-            x1 += pb[i];
+        for(int i = 0; i<s; i++){
+            sinterval[i] = 0;
         }
 
-        while(x2<s){
-            sinterval[x1] += plogs[i];
-            x2 += pb[i];
+        float t = 0; //calculate_threshhold(N, sqrt_N, s, loop_number, pb, pb_len);
+        printf("threshold %f\n", t);
+
+
+        bool found = false;
+        for(int i = 1; i < pb_len; i++){
+            mpz_add_ui(zi, zi, 1);
+
+            TonelliShanks(N, pb[i], &x1, &x2);
+
+            // TESTS
+            mpz_set_ui(p1, pb[i]);
+            printf("x1=%d, x2=%d, p=%d\n", x1, x2, pb[i]);
+
+            mpz_ui_pow_ui(temp, x1, 2);
+            assert(mpz_congruent_p(temp, N, p1));
+
+            mpz_ui_pow_ui(temp, x2, 2);
+            assert(mpz_congruent_p(temp, N, p1));
+            // END TESTS
+
+            while(x1<s){
+                sinterval[x1] += plogs[i];
+                x1 += pb[i];
+            }
+
+            while(x2<s){
+                sinterval[x1] += plogs[i];
+                x2 += pb[i];
+            }
+
         }
 
         for(int i = 0; i<s; i++){
+            printf("%f\n", sinterval[i]);
             if(sinterval[i] > t){
-                
+                mpz_set_ui(zi, s);
+                mpz_mul_ui(zi, zi, loop_number);
+                mpz_add(zi, zi, sqrt_N);
+                mpz_mul(qx, zi, zi);
+                mpz_sub(qx, qx, N);
+                found = vectorize_qsieve(qx, v[relations_found], pb_len, pb);
+                if(found){
+                    relations_found++;
+                }
             }
         }
         
+        loop_number++;
+        printf("relations found = %d\n", relations_found);
+        fflush(stdout);
+    }
     /*
         
         bool found = false;
@@ -217,8 +239,6 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
         v[i] = vi;
         mpz_set(z[i], zi);
     */
-    }
-   exit(1);
 
     if(!tests) printf("\n");
 
