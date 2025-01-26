@@ -14,3 +14,4 @@ typedef struct input_s {
 } input_t;
 
 input_t* parse_input(int argc, char** argv);
+void free_input(input_t* input);

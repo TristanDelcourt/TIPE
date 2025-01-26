@@ -187,5 +187,7 @@ int main(int argc, char** argv){
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!input->quiet) printf("Total time: %fs\n", time_spent);
 
+    free_input(input);
+
     return 0;
 }

@@ -27,6 +27,12 @@ bool valid_int(char* str){
     return true;
 }
 
+void free_input(input_t* input){
+    if(input->output_file) free(input->output_file);
+    mpz_clear(input->N);
+    free(input);
+}
+
 input_t* parse_input(int argc, char** argv){
     input_t* input = init_input();
 
