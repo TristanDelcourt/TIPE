@@ -110,25 +110,22 @@ float* prime_logs(int* pb, int pb_len){
     return plogs;
 }
 
-int calculate_threshhold(/*mpz_t N, mpz_t sqrt_N, int s, int loop_number, */int* pb, int pb_len){
+int calculate_threshhold(mpz_t N, mpz_t sqrt_N, int s, int loop_number, int* pb, int pb_len){
     
-    /*
     mpz_t qstart;
     mpz_init_set_ui(qstart, s);
     mpz_mul_ui(qstart, qstart, loop_number);
     mpz_add(qstart, qstart, sqrt_N);
     mpz_mul(qstart, qstart, qstart);
     mpz_sub(qstart, qstart, N);
-    */
 
-    int t = /*mpz_sizeinbase(qstart, 2) - */(int) log2(pb[pb_len-1]) - 1;
-    //printf("%d, %d\n", t, (int) log2(pb[pb_len-1]));
+    int t = mpz_sizeinbase(qstart, 2) - (int) log2(pb[pb_len-1]);
+    mpz_clear(qstart);
     return t;
 }
 
 int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool tests){
-    /** Gets pb_len+extra zis such that their product will simplify our searach of
-     * a B-smooth relation, definied at:
+    /** Gets pb_len+extra zis that are b-smooth, definied at:
      * Quadratic sieve factorisation algorithm
      * Bc. Ondˇrej Vladyka
      * Definition 1.11 (p.5)
@@ -152,32 +149,52 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
     float* sinterval = malloc(s*sizeof(float));
     float* plogs = prime_logs(pb, pb_len);
 
-    /*
+    
     // TESTS
-    mpz_t temp, p1;
-    mpz_inits(temp, p1, NULL);
+    mpz_t temp, p1, test;
+    mpz_inits(temp, p1, test, NULL);
     // END TESTS
-    */
+    
 
     int* x1 = malloc(pb_len*sizeof(int));
     int* x2 = malloc(pb_len*sizeof(int));
+
+    // find solution for 2
+    mpz_set(temp, sqrt_N);
+    mpz_mul(temp, temp, temp);
+    mpz_sub(temp, temp, N);
+    x1[0] = 0;
+    if(mpz_divisible_ui_p(temp, 2) == 0) x1[0] = 1;
+
+    // TESTS
+    mpz_set(temp, sqrt_N);
+    mpz_add_ui(temp, temp, x1[0]);
+    mpz_mul(temp, temp, temp);
+    mpz_set_ui(p1, pb[0]);
+    assert(mpz_congruent_p(temp, N, p1));
+    // END TESTS
+
     for(int i = 1; i < pb_len; i++){
-            mpz_add_ui(zi, zi, 1);
             TonelliShanks(N, pb, x1, x2, i);
 
-            /*
+            // change solution from x² = n [p] to (sqrt(N) + x)² = n [p]
+            mpz_set_ui(temp, x1[i]);
+            mpz_sub(temp, temp, sqrt_N);
+            mpz_mod_ui(temp, temp, pb[i]);
+
             // TESTS
+            mpz_set(test, temp);
+            mpz_add(test, test, sqrt_N);
+            mpz_pow_ui(test, test, 2);
             mpz_set_ui(p1, pb[i]);
-            //printf("x1=%d, x2=%d, p=%d\n", x1, x2, pb[i]);
-
-            mpz_ui_pow_ui(temp, x1[i], 2);
-            assert(mpz_congruent_p(temp, N, p1));
-
-            mpz_ui_pow_ui(temp, x2[i], 2);
-            assert(mpz_congruent_p(temp, N, p1));
+            assert(mpz_congruent_p(test, N, p1));
             // END TESTS
-            */
+
+            x1[i] = mpz_get_ui(temp);
+            x2[i] = pb[i] - x1[i];
+            
     }
+    mpz_clears(p1, temp, test, NULL);
 
     int loop_number = 0;
     int relations_found = 0;
@@ -188,6 +205,14 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
             sinterval[i] = 0;
         }
 
+        // sieve for 2
+        while(x1[0]<s){
+                sinterval[x1[0]] += plogs[0];
+                x1[0] += pb[0];
+        }
+        x1[0] = x1[0] % s;
+
+        // sieve other primes
         for(int i = 1; i < pb_len; i++){
 
             while(x1[i]<s){
@@ -205,7 +230,9 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
             x2[i] = x2[i] % s;
         }
 
-        int t = calculate_threshhold(/*N, sqrt_N, s, loop_number, */pb, pb_len);
+        int t = calculate_threshhold(N, sqrt_N, s, loop_number, pb, pb_len);
+        //printf("t = %d\n", t);
+
         bool found;
         for(int i = 0; i<s && relations_found < pb_len + extra; i++){
             if(sinterval[i] > t){
@@ -222,6 +249,9 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
                 mpz_sub(qx, qx, N);
                 
                 found = vectorize_qsieve(qx, v[relations_found], pb_len, pb);
+                
+                //printf("sinterval = %f\n", sinterval[i]);
+                
                 if(found){
                     mpz_set(z[relations_found], zi);
                     relations_found++;
@@ -229,7 +259,6 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
 
                     if(!tests){
                         printf("\r");
-                        //printf("sinterval = %f\n", sinterval[i]);
                         printf("%.1f%% | %f%%", (float)relations_found/(pb_len+extra-1)*100, (float)relations_found/tries*100);
                         fflush(stdout);
                     }

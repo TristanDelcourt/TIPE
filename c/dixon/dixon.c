@@ -26,8 +26,7 @@ bool vectorize_dixon(mpz_t n, int* v, int pb_len, int* pb){
 }
 
 int** dixon(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, bool tests){
-    /** Gets pb_len+extra zis such that their product will simplify our searach of
-     * a B-smooth relation, definied at:
+    /** Gets pb_len+extra b-smooth realtions definied at:
      * Quadratic sieve factorisation algorithm
      * Bc. Ondˇrej Vladyka
      * Definition 1.11 (p.5)
