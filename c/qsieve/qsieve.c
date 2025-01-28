@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdint.h>
 #include <math.h>
 
 bool vectorize_qsieve(mpz_t n, int* v, int pb_len, int* pb){
@@ -25,6 +26,84 @@ bool vectorize_qsieve(mpz_t n, int* v, int pb_len, int* pb){
     if(mpz_cmp_ui(n, 1) == 0)
         return true;
     return false;
+}
+
+
+uint64_t modpow(uint64_t a, uint64_t b, uint64_t n) {
+    uint64_t x = 1, y = a;
+    while (b > 0) {
+        if (b % 2 == 1) {
+            x = (x * y) % n; // multiplying with base
+        }
+        y = (y * y) % n; // squaring the base
+        b /= 2;
+    }
+    return x % n;
+}
+
+void ts(mpz_t n, int* p, int* x1, int*x2, int j) {
+    uint64_t q = p[j] - 1;
+    uint64_t ss = 0;
+    uint64_t z = 2;
+    uint64_t c, r, t, m;
+
+    while ((q & 1) == 0) {
+        ss += 1;
+        q >>= 1;
+    }
+
+    mpz_t temp, pj;
+    mpz_init(temp);
+    mpz_init_set_ui(pj, p[j]);
+
+    if (ss == 1) {
+        //uint64_t r1 = modpow(n, (p + 1) / 4, p);
+        mpz_powm_ui(temp, n, (p[j]+1)/4, pj);
+        uint64_t r1 = mpz_get_ui(temp);
+
+        x1[j] = r1;
+        x2[j] = p[j] - r1;
+        return;
+    }
+
+    while (modpow(z, (p[j] - 1) / 2, p[j]) != p[j] - 1) {
+        z++;
+    }
+
+    c = modpow(z, q, p[j]);
+    
+    //r = modpow(n, (q + 1) / 2, p);
+    mpz_powm_ui(temp, n, (q+1)/2, pj);
+    r = mpz_get_ui(temp);
+
+    //t = modpow(n, q, p);
+    mpz_powm_ui(temp, n, q, pj);
+    t = mpz_get_ui(temp);
+    
+    m = ss;
+
+    while (true) {
+        uint64_t i = 0, zz = t;
+        uint64_t b = c, e;
+        if (t == 1) {
+            x1[j] = r;
+            x2[j] = p[j] - r;
+            return;
+        }
+        while (zz != 1 && i < (m - 1)) {
+            zz = zz * zz % p[j];
+            i++;
+        }
+        e = m - i - 1;
+        while (e > 0) {
+            b = b * b % p[j];
+            e--;
+        }
+        r = r * b % p[j];
+        c = b * b % p[j];
+        t = t * c % p[j];
+        m = i;
+    }
 }
 
 void TonelliShanks(mpz_t a, int* p, int* x1, int* x2, int j){
@@ -95,7 +174,7 @@ void TonelliShanks(mpz_t a, int* p, int* x1, int* x2, int j){
     }
 
     x1[j] = mpz_get_ui(R);
-    x2[j] = p[j] - mpz_get_ui(R);
+    x2[j] = p[j] - x1[j];
 
     mpz_clears(y, pj, R, c, t, E, temp, b, NULL);
 }
@@ -151,8 +230,8 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
 
     
     // TESTS
-    mpz_t temp, p1, test;
-    mpz_inits(temp, p1, test, NULL);
+    mpz_t temp;
+    mpz_init(temp);
     // END TESTS
     
 
@@ -164,37 +243,26 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
     mpz_mul(temp, temp, temp);
     mpz_sub(temp, temp, N);
     x1[0] = 0;
-    if(mpz_divisible_ui_p(temp, 2) == 0) x1[0] = 1;
+    if(mpz_divisible_ui_p(temp, 2) != 0) x1[0] = 1;
 
-    // TESTS
-    mpz_set(temp, sqrt_N);
-    mpz_add_ui(temp, temp, x1[0]);
-    mpz_mul(temp, temp, temp);
-    mpz_set_ui(p1, pb[0]);
-    assert(mpz_congruent_p(temp, N, p1));
-    // END TESTS
 
     for(int i = 1; i < pb_len; i++){
-            TonelliShanks(N, pb, x1, x2, i);
+            ts(N, pb, x1, x2, i);
 
             // change solution from x² = n [p] to (sqrt(N) + x)² = n [p]
             mpz_set_ui(temp, x1[i]);
             mpz_sub(temp, temp, sqrt_N);
             mpz_mod_ui(temp, temp, pb[i]);
 
-            // TESTS
-            mpz_set(test, temp);
-            mpz_add(test, test, sqrt_N);
-            mpz_pow_ui(test, test, 2);
-            mpz_set_ui(p1, pb[i]);
-            assert(mpz_congruent_p(test, N, p1));
-            // END TESTS
-
             x1[i] = mpz_get_ui(temp);
-            x2[i] = pb[i] - x1[i];
-            
+
+            mpz_set_ui(temp, x2[i]);
+            mpz_sub(temp, temp, sqrt_N);
+            mpz_mod_ui(temp, temp, pb[i]);
+
+            x2[i] = mpz_get_ui(temp);      
     }
-    mpz_clears(p1, temp, test, NULL);
+    mpz_clear(temp);
 
     int loop_number = 0;
     int relations_found = 0;
@@ -207,10 +275,10 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
 
         // sieve for 2
         while(x1[0]<s){
-                sinterval[x1[0]] += plogs[0];
-                x1[0] += pb[0];
+            sinterval[x1[0]] += plogs[0];
+            x1[0] += pb[0];
         }
-        x1[0] = x1[0] % s;
+        x1[0] = x1[0] - s;
 
         // sieve other primes
         for(int i = 1; i < pb_len; i++){
@@ -221,13 +289,14 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
             }
 
             while(x2[i]<s){
+
                 sinterval[x2[i]] += plogs[i];
                 x2[i] += pb[i];
             }
 
             //next interval
-            x1[i] = x1[i] % s;
-            x2[i] = x2[i] % s;
+            x1[i] = x1[i] - s;
+            x2[i] = x2[i] - s;
         }
 
         int t = calculate_threshhold(N, sqrt_N, s, loop_number, pb, pb_len);
@@ -259,7 +328,7 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
 
                     if(!tests){
                         printf("\r");
-                        printf("%.1f%% | %f%%", (float)relations_found/(pb_len+extra-1)*100, (float)relations_found/tries*100);
+                        printf("%.1f%% | %.1f%%", (float)relations_found/(pb_len+extra-1)*100, (float)relations_found/tries*100);
                         fflush(stdout);
                     }
                 }

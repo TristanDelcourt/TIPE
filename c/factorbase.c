@@ -24,8 +24,7 @@ bool is_prime(int n) {
 int pi(int n) {
     int k = 0;
     for (int i = 2; i <= n; i++) { 
-        if (is_prime(i)) 
-            k++;; 
+        if (is_prime(i)) k++;
     } 
     return k;
 } 
