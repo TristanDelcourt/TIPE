@@ -11,7 +11,7 @@ input_t* init_input(void){
     input->sieving_interval = -1;
     input->extra = -1;
     input->quiet = false;
-    input->algorithm = DEFAULT;
+    input->algorithm = QSIEVE;
     mpz_init_set_ui(input->N, 0);
     return input;
 }

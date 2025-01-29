@@ -59,59 +59,53 @@ void sum_lignes(int* sum, int** v, system_t s){
     }
 }
 
-void factor(mpz_t N, int B, int extra, bool quiet, int sinterval, TYPE algorithm){
-    int piB = pi(B);
-    if(!quiet) printf("pi(B) = %d\n", piB);
-    int* p = primes(piB, B);
+void factor(input_t* input){
+
+    int piB = pi(input->bound);
+    if(!input->quiet) printf("pi(B) = %d\n", piB);
+    int* p = primes(piB, input->bound);
 
     int pb_len;
     int* pb;
-    switch(algorithm){
+    switch(input->algorithm){
         case DIXON:
             pb = p;
             pb_len = piB;
             break;
         case QSIEVE:
-            pb = prime_base(N, &pb_len, p, piB);
-            if(!quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
-            free(p);
-            break;
-        case DEFAULT:
-            pb = prime_base(N, &pb_len, p, piB);
-            if(!quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
+            pb = prime_base(input->N, &pb_len, p, piB);
+            if(!input->quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
             free(p);
             break;
     }
+    int target_nb = pb_len + input->extra;
 
-    mpz_t* z = malloc((pb_len+extra)*sizeof(mpz_t));
-    for(int i = 0; i < pb_len+extra; i++){
+    mpz_t* z = malloc((target_nb)*sizeof(mpz_t));
+    for(int i = 0; i < target_nb; i++){
         mpz_init(z[i]);
     }
     
     //Getting zis
     int** v;
     clock_t t1 = clock();
-    switch(algorithm){
+    switch(input->algorithm){
         case DIXON:
-            v = dixon(z, N, pb_len, pb, extra, quiet);
+            v = dixon(z, input->N, pb_len, pb, input->extra, input->quiet);
             break;
         case QSIEVE:
-            v = qsieve(z, N, pb_len, pb, extra, sinterval, quiet);
-            break;
-        case DEFAULT:
-            v = qsieve(z, N, pb_len, pb, extra, sinterval, quiet);
+            v = qsieve(z, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
             break;
     }
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
-    if(!quiet) printf("Time to get zi: %fs\n", time_spent);
+    if(!input->quiet) printf("Time to get zi: %fs\n", time_spent);
     
     mpz_t f1, f2, Z1, Z2;
     mpz_inits(f1, f2, Z1, Z2, NULL);
     
     //gaussian init
-    system_t s = init_gauss(v, pb_len+extra, pb_len);
-    if(!quiet) printf("2^%d solutions to iterate\n", s->n2 - s->arb);
+    system_t s = init_gauss(v, target_nb, pb_len);
+    if(!input->quiet) printf("2^%d solutions to iterate\n", s->n2 - s->arb);
     int* sum = malloc(pb_len*sizeof(int));
 
     bool done = false;
@@ -122,38 +116,38 @@ void factor(mpz_t N, int B, int extra, bool quiet, int sinterval, TYPE algorithm
         sum_lignes(sum, v, s);
         div_vect(sum, 2, pb_len);
 
-        prod_vect(Z1, z, pb_len+extra);
+        prod_vect(Z1, z, target_nb);
         rebuild(Z2, sum, pb, pb_len);
 
         mpz_sub(f1, Z1, Z2);
         mpz_add(f2, Z1, Z2);
 
-        mpz_gcd(f1, f1, N);
-        mpz_gcd(f2, f2, N);
+        mpz_gcd(f1, f1, input->N);
+        mpz_gcd(f2, f2, input->N);
 
-        if((!(mpz_cmp_ui(f1, 1) == 0) && !(mpz_cmp(f1, N) == 0))
-            || (!(mpz_cmp_ui(f2, 1) == 0) && (!(mpz_cmp(f2, N) == 0)))){
+        if((!(mpz_cmp_ui(f1, 1) == 0) && !(mpz_cmp(f1, input->N) == 0))
+            || (!(mpz_cmp_ui(f2, 1) == 0) && (!(mpz_cmp(f2, input->N) == 0)))){
             done = true;
         }
 
         if(s->done){
-            if(!quiet) fprintf(stderr, "ERROR: no solution for this set of zi\n");
+            if(!input->quiet) fprintf(stderr, "ERROR: no solution for this set of zi\n");
             exit(1);
         }
     }
     free(sum);
     free(pb);
     free_system(s);
-    free_ll(v, pb_len+extra);
-    for(int i = 0; i < pb_len+extra; i++){
+    free_ll(v, target_nb);
+    for(int i = 0; i < target_nb; i++){
         mpz_clear(z[i]);
     }
     free(z);
 
-    if(!quiet) gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", N, f1, N, f2);
+    if(!input->quiet) gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", input->N, f1, input->N, f2);
 
-    assert(mpz_divisible_p(N, f1));
-    assert(mpz_divisible_p(N, f2));
+    assert(mpz_divisible_p(input->N, f1));
+    assert(mpz_divisible_p(input->N, f2));
 
     mpz_clears(f1, f2, Z1, Z2, NULL);
 }
@@ -170,19 +164,12 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    if(input->bound == -1) input->bound = 500;
-    if(input->sieving_interval == -1) input->sieving_interval = 1000;
+    if(input->bound == -1) input->bound = 1000;
+    if(input->sieving_interval == -1) input->sieving_interval = 100000;
     if(input->extra == -1) input->extra = 1;
 
     clock_t t1 = clock();
-    factor(
-        input->N,
-        input->bound,
-        input->extra,
-        input->quiet,
-        input->sieving_interval,
-        input->algorithm
-    );
+    factor(input);
     clock_t t2 = clock();
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!input->quiet) printf("Total time: %fs\n", time_spent);

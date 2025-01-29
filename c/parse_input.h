@@ -2,7 +2,7 @@
 #include <gmp.h>
 #include <stdbool.h>
 
-typedef enum {DEFAULT, DIXON, QSIEVE} TYPE;
+typedef enum {DIXON, QSIEVE} TYPE;
 
 typedef struct input_s {
     char* output_file;
