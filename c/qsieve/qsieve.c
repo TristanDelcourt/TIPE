@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <math.h>
+#include "../system.h"
 
 bool vectorize_qsieve(mpz_t n, int* v, int pb_len, int* pb){
     /** Attemps naive factorisation to 'n' with the primes in
@@ -106,6 +107,16 @@ void ts(mpz_t n, int* p, int* x1, int*x2, int j) {
     }
 }
 
+float* prime_logs(int* pb, int pb_len){
+    float* plogs = malloc(pb_len*sizeof(float));
+    
+    for(int i = 0; i<pb_len; i++){
+        plogs[i] = log2(pb[i]);
+    }
+
+    return plogs;
+}
+
 int calculate_threshhold(mpz_t N, mpz_t sqrt_N, int s, int loop_number, int* pb, int pb_len){
     
     mpz_t qstart;
@@ -120,7 +131,7 @@ int calculate_threshhold(mpz_t N, mpz_t sqrt_N, int s, int loop_number, int* pb,
     return t;
 }
 
-int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool tests){
+int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool quiet){
     /** Gets pb_len+extra zis that are b-smooth, definied at:
      * Quadratic sieve factorisation algorithm
      * Bc. Ondˇrej Vladyka
@@ -235,28 +246,23 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool test
                 mpz_sub(qx, qx, N);
                 
                 found = vectorize_qsieve(qx, v[relations_found], pb_len, pb);
-                
-                //printf("sinterval = %f\n", sinterval[i]);
-                
+                                
                 if(found){
                     mpz_set(z[relations_found], zi);
                     relations_found++;
                     found = false;
-
-                    if(!tests){
+                    if(!quiet){
                         printf("\r");
-                        printf("%.1f%% | %.1f%%", (float)relations_found/(pb_len+extra-1)*100, (float)relations_found/tries*100);
+                        printf("%.1f%% | %.1f%%", (float)relations_found/(pb_len+extra)*100, (float)relations_found/tries*100);
                         fflush(stdout);
                     }
                 }
             }
         }
-
-        //printf("found = %d\n", relations_found);
         loop_number++;
     }
 
-    if(!tests) printf("\n");
+    if(!quiet) printf("\n");
 
     mpz_clears(sqrt_N, zi, qx, NULL);
     free(x1);

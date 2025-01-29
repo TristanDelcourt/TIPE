@@ -72,13 +72,3 @@ void TonelliShanks(mpz_t a, int* p, int* x1, int* x2, int j){
 
     mpz_clears(y, pj, R, c, t, E, temp, b, NULL);
 }
-
-float* prime_logs(int* pb, int pb_len){
-    float* plogs = malloc(pb_len*sizeof(float));
-    
-    for(int i = 0; i<pb_len; i++){
-        plogs[i] = log2(pb[i]);
-    }
-
-    return plogs;
-}

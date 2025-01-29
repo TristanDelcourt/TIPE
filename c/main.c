@@ -100,8 +100,8 @@ void factor(input_t* input){
     double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
     if(!input->quiet) printf("Time to get zi: %fs\n", time_spent);
     
-    mpz_t f1, f2, Z1, Z2;
-    mpz_inits(f1, f2, Z1, Z2, NULL);
+    mpz_t f, Z1, Z2, test1, test2;
+    mpz_inits(f, Z1, Z2, test1, test2, NULL);
     
     //gaussian init
     system_t s = init_gauss(v, target_nb, pb_len);
@@ -110,23 +110,34 @@ void factor(input_t* input){
 
     bool done = false;
     while(!done){
-
         gaussian_step(s);
 
+        prod_vect(Z1, z, target_nb, s);
         sum_lignes(sum, v, s);
         div_vect(sum, 2, pb_len);
-
-        prod_vect(Z1, z, target_nb);
         rebuild(Z2, sum, pb, pb_len);
 
-        mpz_sub(f1, Z1, Z2);
-        mpz_add(f2, Z1, Z2);
+        mpz_set(test1, Z1);
+        mpz_mul(test1, test1, test1);
+        mpz_set(test2, Z2);
+        mpz_mul(test2, test2, test2);
+        assert(mpz_congruent_p(test1, test2, input->N) != 0);
 
-        mpz_gcd(f1, f1, input->N);
-        mpz_gcd(f2, f2, input->N);
+        mpz_sub(f, Z1, Z2);
+        mpz_gcd(f, f, input->N);
 
-        if((!(mpz_cmp_ui(f1, 1) == 0) && !(mpz_cmp(f1, input->N) == 0))
-            || (!(mpz_cmp_ui(f2, 1) == 0) && (!(mpz_cmp(f2, input->N) == 0)))){
+        if(mpz_cmp_ui(f, 1) != 0 && mpz_cmp(f, input->N) != 0){
+            assert(mpz_divisible_p(input->N, f));
+            if(!input->quiet) gmp_printf("%Zd = 0 [%Zd]\n", input->N, f);
+            done = true;
+        }
+        
+        mpz_add(f, Z1, Z2);
+        mpz_gcd(f, f, input->N);
+
+        if(mpz_cmp_ui(f, 1) != 0 && mpz_cmp(f, input->N) != 0){
+            assert(mpz_divisible_p(input->N, f));
+            if(!input->quiet) gmp_printf("%Zd = 0 [%Zd]\n", input->N, f);
             done = true;
         }
 
@@ -135,6 +146,7 @@ void factor(input_t* input){
             exit(1);
         }
     }
+
     free(sum);
     free(pb);
     free_system(s);
@@ -144,12 +156,9 @@ void factor(input_t* input){
     }
     free(z);
 
-    if(!input->quiet) gmp_printf("%Zd = 0 [%Zd]\n%Zd = 0 [%Zd]\n", input->N, f1, input->N, f2);
 
-    assert(mpz_divisible_p(input->N, f1));
-    assert(mpz_divisible_p(input->N, f2));
 
-    mpz_clears(f1, f2, Z1, Z2, NULL);
+    mpz_clears(f, Z1, Z2, NULL);
 }
 
 int main(int argc, char** argv){

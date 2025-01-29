@@ -1,6 +1,7 @@
 #include <gmp.h>
 #include <assert.h>
 #include <stdlib.h>
+#include "system.h"
 
 void mod_vect(int* v, int mod, int n1){
     for(int i = 0; i<n1; i++){
@@ -28,9 +29,11 @@ void sub_vect(int** v, int i, int j, int n1){
     }
 }
 
-void prod_vect(mpz_t prod, mpz_t* v, int n1){
+void prod_vect(mpz_t prod, mpz_t* z, int n1, system_t s){
     mpz_set_ui(prod, 1);
     for(int i = 0; i<n1; i++){
-        mpz_mul(prod, prod, v[i]);
+        if(s->sol[i]){
+            mpz_mul(prod, prod, z[s->perm[i]]);
+        }
     }
 }
