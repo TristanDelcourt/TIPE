@@ -17,9 +17,6 @@ uint64_t modpow(uint64_t a, uint64_t b, uint64_t n) {
 }
 
 void tonelli_shanks_ui(mpz_t n, unsigned long int p, int* x1, int* x2) {
-    printf("%lu\n", p);
-    exit(1);
-
     uint64_t q = p - 1;
     uint64_t ss = 0;
     uint64_t z = 2;
@@ -178,9 +175,6 @@ void tonelli_shanks_mpz(mpz_t n, mpz_t p, mpz_t x1, mpz_t x2){
         mpz_mod(t, t, p);
 
         mpz_set(m, i);
-
-        gmp_printf("---\n%Zd\n%Zd\n%Zd\n%Zd\n%Zd\n%Zd\n%Zd\n%Zd\n", c, r, t, m, i, zz, b, e);
-        fflush(stdout);
     }
 
 }

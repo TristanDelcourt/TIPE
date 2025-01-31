@@ -70,7 +70,7 @@ int* prime_base(mpz_t n, int* pb_len, int* primes, int piB){
         }
     }
     *pb_len = j;
-    pb = realloc(pb, j*sizeof(int));
+    pb = realloc(pb, (j+1)*sizeof(int)); // +1 used for mpqs
     
     mpz_clear(p1);
     return pb;

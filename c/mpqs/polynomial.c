@@ -9,7 +9,6 @@
 void calc_coefficients(poly_t p){
     mpz_mul(p->a, p->d, p->d);
 
-    
     mpz_t x1, x2;
     mpz_inits(x1, x2, NULL);
     tonelli_shanks_mpz(p->N, p->d, x1, x2);
@@ -44,13 +43,16 @@ void calc_coefficients(poly_t p){
 
 void get_next_poly(poly_t p){
     mpz_nextprime(p->d, p->d);
+    while(mpz_legendre(p->N, p->d) != 1){
+        mpz_nextprime(p->d, p->d);
+    }
     calc_coefficients(p);
 }
 
 poly_t init_poly(mpz_t N, int M){
     poly_t p = malloc(sizeof(struct poly_s));
 
-    mpz_inits(p->d, p->N, p->a, p->b, p->c, p->op1, p->op2, p->op3, p->qx, NULL);
+    mpz_inits(p->d, p->N, p->a, p->b, p->c, p->op1, p->op2, p->op3, p->zi, p->qx, NULL);
     p->done_iter = false;
     mpz_set(p->N, N);
 
@@ -60,18 +62,25 @@ poly_t init_poly(mpz_t N, int M){
     mpz_sqrt(p->op1, p->op1);
     mpz_div_ui(p->op1, p->op1, M);
     mpz_sqrt(p->op1, p->op1);
-    mpz_prevprime(p->op1, p->op1);
+    mpz_prevprime(p->d, p->op1);
     
     // get next prime such that (n/p) = 1
-    while(mpz_legendre(N, p->op1) != 1){
-        mpz_nextprime(p->op1, p->op1);
+    while(mpz_legendre(N, p->d) != 1){
+        mpz_nextprime(p->d, p->d);
     }
 
-    mpz_set(p->d, p->op1);
     calc_coefficients(p);
-    
-    gmp_printf("--\n%Zd\n--\n%Zd\n--\n%Zd\n--\n", p->a, p->b, p->c);
-
     return p;
+}
+
+void calc_poly(poly_t p, mpz_t x){
+    mpz_mul(p->zi, p->a, x);
+    mpz_add(p->zi, p->zi, p->b);
+    
+    mpz_mul(p->qx, p->zi, p->zi);
+    mpz_sub(p->qx, p->qx, p->N);
+
+    assert(mpz_divisible_p(p->qx, p->a) != 0);
+    mpz_divexact(p->qx, p->qx, p->a);
 }
 

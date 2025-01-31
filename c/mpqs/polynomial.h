@@ -9,6 +9,8 @@ struct poly_s {
     mpz_t a;
     mpz_t b;
     mpz_t c;
+
+    mpz_t zi;
     mpz_t qx;
 
     // used to make operations without declaring and freeing everytime
@@ -20,3 +22,4 @@ typedef struct poly_s* poly_t;
 
 void get_next_poly(poly_t p);
 poly_t init_poly(mpz_t N, int M);
+void calc_poly(poly_t p, mpz_t x);

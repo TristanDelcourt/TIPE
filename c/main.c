@@ -15,6 +15,8 @@
 #include "./qsieve/qsieve.h"
 
 #include "./mpqs/polynomial.h"
+#include "./mpqs/mpqs.h"
+
 
 /**
  * 
@@ -79,6 +81,12 @@ void factor(input_t* input){
             if(!input->quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
             free(p);
             break;
+        case MPQS:
+            pb = prime_base(input->N, &pb_len, p, piB);
+            pb[pb_len] = -1;
+            if(!input->quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
+            free(p);
+            break;
     }
     int target_nb = pb_len + input->extra;
 
@@ -96,6 +104,9 @@ void factor(input_t* input){
             break;
         case QSIEVE:
             v = qsieve(z, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
+            break;
+        case MPQS:
+            v = mpqs(z, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
             break;
     }
     clock_t t2 = clock();
@@ -180,7 +191,6 @@ int main(int argc, char** argv){
     if(input->extra == -1) input->extra = 1;
 
     poly_t q = init_poly(input->N, input->sieving_interval);
-    exit(1);
 
     clock_t t1 = clock();
     factor(input);
