@@ -1,6 +1,6 @@
 /.vscode
 /__pycache__
-/input
 /c/bin
+/tests/input
 /tests/primes
 /tests/products
