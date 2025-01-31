@@ -47,7 +47,7 @@ factor: dir list_matrix_utils.o vector.o system.o factorbase.o tonellishanks.o p
 		$(DIR)/parse_input.o \
 		$(DIR)/qsieve.o \
 		$(DIR)/dixon.o \
-	-o $(DIR)/factor $(CLINKS)
+		-o $(DIR)/factor $(CLINKS)
 
 # clean
 clean:

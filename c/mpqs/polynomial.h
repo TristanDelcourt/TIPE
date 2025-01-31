@@ -3,16 +3,20 @@
 #include <stdbool.h>
 
 struct poly_s {
+    mpz_t d;
+    mpz_t N;
+
     mpz_t a;
     mpz_t b;
     mpz_t c;
     mpz_t qx;
 
     // used to make operations without declaring and freeing everytime
-    mpz_t op1, op2, op3, op4;
+    mpz_t op1, op2, op3;
     bool done_iter;
 };
 
 typedef struct poly_s* poly_t;
 
+void get_next_poly(poly_t p);
 poly_t init_poly(mpz_t N, int M);
