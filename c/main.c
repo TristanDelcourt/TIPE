@@ -14,6 +14,8 @@
 #include "./dixon/dixon.h"
 #include "./qsieve/qsieve.h"
 
+#include "./mpqs/polynomial.h"
+
 /**
  * 
  * 
@@ -176,6 +178,9 @@ int main(int argc, char** argv){
     if(input->bound == -1) input->bound = 1000;
     if(input->sieving_interval == -1) input->sieving_interval = 100000;
     if(input->extra == -1) input->extra = 1;
+
+    poly_t q = init_poly(input->N, input->sieving_interval);
+    exit(1);
 
     clock_t t1 = clock();
     factor(input);

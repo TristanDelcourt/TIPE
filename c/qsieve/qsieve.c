@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <stdint.h>
 #include <math.h>
+
 #include "../system.h"
+#include "../tonellishanks.h"
 
 bool vectorize_qsieve(mpz_t n, int* v, int pb_len, int* pb){
     /** Attemps naive factorisation to 'n' with the primes in
@@ -27,84 +28,6 @@ bool vectorize_qsieve(mpz_t n, int* v, int pb_len, int* pb){
     if(mpz_cmp_ui(n, 1) == 0)
         return true;
     return false;
-}
-
-
-uint64_t modpow(uint64_t a, uint64_t b, uint64_t n) {
-    uint64_t x = 1, y = a;
-    while (b > 0) {
-        if (b % 2 == 1) {
-            x = (x * y) % n; // multiplying with base
-        }
-        y = (y * y) % n; // squaring the base
-        b /= 2;
-    }
-    return x % n;
-}
-
-void ts(mpz_t n, int* p, int* x1, int*x2, int j) {
-    uint64_t q = p[j] - 1;
-    uint64_t ss = 0;
-    uint64_t z = 2;
-    uint64_t c, r, t, m;
-
-    while ((q & 1) == 0) {
-        ss += 1;
-        q >>= 1;
-    }
-
-    mpz_t temp, pj;
-    mpz_init(temp);
-    mpz_init_set_ui(pj, p[j]);
-
-    if (ss == 1) {
-        //uint64_t r1 = modpow(n, (p + 1) / 4, p);
-        mpz_powm_ui(temp, n, (p[j]+1)/4, pj);
-        uint64_t r1 = mpz_get_ui(temp);
-
-        x1[j] = r1;
-        x2[j] = p[j] - r1;
-        return;
-    }
-
-    while (modpow(z, (p[j] - 1) / 2, p[j]) != (uint64_t) p[j] - 1) { // uint_64 only there for the compiler to stop complaining
-        z++;
-    }
-
-    c = modpow(z, q, p[j]);
-    
-    //r = modpow(n, (q + 1) / 2, p);
-    mpz_powm_ui(temp, n, (q+1)/2, pj);
-    r = mpz_get_ui(temp);
-
-    //t = modpow(n, q, p);
-    mpz_powm_ui(temp, n, q, pj);
-    t = mpz_get_ui(temp);
-    
-    m = ss;
-
-    while (true) {
-        uint64_t i = 0, zz = t;
-        uint64_t b = c, e;
-        if (t == 1) {
-            x1[j] = r;
-            x2[j] = p[j] - r;
-            return;
-        }
-        while (zz != 1 && i < (m - 1)) {
-            zz = zz * zz % p[j];
-            i++;
-        }
-        e = m - i - 1;
-        while (e > 0) {
-            b = b * b % p[j];
-            e--;
-        }
-        r = r * b % p[j];
-        c = b * b % p[j];
-        t = t * c % p[j];
-        m = i;
-    }
 }
 
 float* prime_logs(int* pb, int pb_len){
@@ -173,9 +96,12 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool quie
     x1[0] = 0;
     if(mpz_divisible_ui_p(temp, 2) != 0) x1[0] = 1;
 
-
+    int sol1, sol2;
     for(int i = 1; i < pb_len; i++){
-            ts(N, pb, x1, x2, i);
+
+            tonelli_shanks_ui(N, pb[i], &sol1, &sol2);
+            x1[i] = sol1;
+            x2[i] = sol2;
 
             // change solution from x² = n [p] to (sqrt(N) + x)² = n [p]
             mpz_set_ui(temp, x1[i]);
@@ -188,7 +114,7 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool quie
             mpz_sub(temp, temp, sqrt_N);
             mpz_mod_ui(temp, temp, pb[i]);
 
-            x2[i] = mpz_get_ui(temp);      
+            x2[i] = mpz_get_ui(temp);
     }
     mpz_clear(temp);
 
