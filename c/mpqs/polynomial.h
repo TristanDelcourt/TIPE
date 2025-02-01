@@ -23,3 +23,4 @@ typedef struct poly_s* poly_t;
 void get_next_poly(poly_t p);
 poly_t init_poly(mpz_t N, int M);
 void calc_poly(poly_t p, mpz_t x);
+void free_poly(poly_t p);

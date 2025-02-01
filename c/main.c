@@ -26,6 +26,20 @@
  */
 
 
+void rebuild_mpqs(mpz_t prod, mpz_t* d, int* v, int* primes, int n1, system_t s){
+    mpz_set_ui(prod, 1);
+    mpz_t temp;
+    mpz_init(temp);
+    for(int i = 0; i<n1; i++){
+        if(s->sol[i]){
+            mpz_mul(prod, prod, d[s->perm[i]]);
+        }
+        mpz_ui_pow_ui(temp, primes[i], v[i]);
+        mpz_mul(prod, prod, temp);
+    }
+    mpz_clear(temp);
+}
+
 void rebuild(mpz_t prod, int* v, int* primes, int n1){
     /** Rebuilds the product of primes to the power of half
      * the solution found by the gaussian solve
@@ -97,6 +111,7 @@ void factor(input_t* input){
     
     //Getting zis
     int** v;
+    mpz_t* d;
     clock_t t1 = clock();
     switch(input->algorithm){
         case DIXON:
@@ -106,7 +121,11 @@ void factor(input_t* input){
             v = qsieve(z, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
             break;
         case MPQS:
-            v = mpqs(z, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
+            d = malloc(target_nb*sizeof(mpz_t));
+            for(int i = 0; i < target_nb; i++){
+                mpz_init(d[i]);
+            }
+            v = mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
             break;
     }
     clock_t t2 = clock();
@@ -117,9 +136,24 @@ void factor(input_t* input){
     mpz_inits(f, Z1, Z2, test1, test2, NULL);
     
     //gaussian init
-    system_t s = init_gauss(v, target_nb, pb_len);
+    system_t s;
+    int* sum;
+    switch(input->algorithm){
+        case DIXON:
+            s = init_gauss(v, target_nb, pb_len);
+            sum = malloc(pb_len*sizeof(int));
+            break;
+        case QSIEVE:
+            s = init_gauss(v, target_nb, pb_len);
+            sum = malloc(pb_len*sizeof(int));
+            break;
+        case MPQS:
+            // for -1
+            s = init_gauss(v, target_nb, pb_len+1);
+            sum = malloc((pb_len+1)*sizeof(int));
+            break;
+    }
     if(!input->quiet) printf("2^%d solutions to iterate\n", s->n2 - s->arb);
-    int* sum = malloc(pb_len*sizeof(int));
 
     bool done = false;
     while(!done){
@@ -128,7 +162,18 @@ void factor(input_t* input){
         prod_vect(Z1, z, target_nb, s);
         sum_lignes(sum, v, s);
         div_vect(sum, 2, pb_len);
-        rebuild(Z2, sum, pb, pb_len);
+        
+        switch(input->algorithm){
+            case DIXON:
+                rebuild(Z2, sum, pb, pb_len);
+                break;
+            case QSIEVE:
+                rebuild(Z2, sum, pb, pb_len);
+                break;
+            case MPQS:
+                rebuild_mpqs(Z2, d, sum, pb, pb_len, s);
+                break;
+        }
 
         mpz_set(test1, Z1);
         mpz_mul(test1, test1, test1);
@@ -168,10 +213,12 @@ void factor(input_t* input){
         mpz_clear(z[i]);
     }
     free(z);
+    for(int i = 0; i < target_nb; i++){
+        mpz_clear(d[i]);
+    }
+    free(d);
 
-
-
-    mpz_clears(f, Z1, Z2, NULL);
+    mpz_clears(f, Z1, Z2, test1, test2, NULL);
 }
 
 int main(int argc, char** argv){
@@ -189,8 +236,6 @@ int main(int argc, char** argv){
     if(input->bound == -1) input->bound = 1000;
     if(input->sieving_interval == -1) input->sieving_interval = 100000;
     if(input->extra == -1) input->extra = 1;
-
-    poly_t q = init_poly(input->N, input->sieving_interval);
 
     clock_t t1 = clock();
     factor(input);

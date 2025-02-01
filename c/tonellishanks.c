@@ -39,6 +39,7 @@ void tonelli_shanks_ui(mpz_t n, unsigned long int p, int* x1, int* x2) {
 
         *x1 = r1;
         *x2 = p - r1;
+        mpz_clears(temp, pj, NULL);
         return;
     }
 
@@ -64,6 +65,7 @@ void tonelli_shanks_ui(mpz_t n, unsigned long int p, int* x1, int* x2) {
         if (t == 1) {
             *x1 = r;
             *x2 = p - r;
+            mpz_clears(temp, pj, NULL);
             return;
         }
         while (zz != 1 && i < (m - 1)) {
@@ -83,6 +85,8 @@ void tonelli_shanks_ui(mpz_t n, unsigned long int p, int* x1, int* x2) {
 }
 
 void tonelli_shanks_mpz(mpz_t n, mpz_t p, mpz_t x1, mpz_t x2){
+    assert(mpz_legendre(n, p) == 1);
+
     mpz_t q, z;
     mpz_init_set(q, p);
     mpz_sub_ui(q, q, 1);
@@ -118,9 +122,9 @@ void tonelli_shanks_mpz(mpz_t n, mpz_t p, mpz_t x1, mpz_t x2){
     mpz_powm(op2, z, op1, p);
 
     mpz_sub_ui(op3, p, 1);
-    while(mpz_cmp(op3, op2) != 0){
+    while(mpz_cmp(op2, op3) != 0){
         mpz_add_ui(z, z, 1);
-        mpz_powm(op3, z, op1, p);
+        mpz_powm(op2, z, op1, p);
     }
 
     mpz_t c, r, t, m, i, zz, b, e;
@@ -136,8 +140,6 @@ void tonelli_shanks_mpz(mpz_t n, mpz_t p, mpz_t x1, mpz_t x2){
     mpz_set_ui(m, ss);
 
     while(1){
-        
-
         mpz_set_ui(i, 0);
         mpz_set(zz, t);
         mpz_set(b, c);
@@ -159,7 +161,7 @@ void tonelli_shanks_mpz(mpz_t n, mpz_t p, mpz_t x1, mpz_t x2){
 
         mpz_sub(e, m, i);
         mpz_sub_ui(e, e, 1);
-        while(mpz_cmp_ui(e, 0)>0){
+        while(mpz_sgn(e)>0){
             mpz_mul(b, b, b);
             mpz_mod(b, b, p);
             mpz_sub_ui(e, e, 1);

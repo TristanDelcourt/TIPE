@@ -11,8 +11,7 @@ void calc_coefficients(poly_t p){
 
     mpz_t x1, x2;
     mpz_inits(x1, x2, NULL);
-    tonelli_shanks_mpz(p->N, p->d, x1, x2);
-    
+    tonelli_shanks_mpz(p->N, p->d, x1, x2);    
 
     // getting ready for congruence solve for raising solution
     mpz_mul_ui(p->op1, x1, 2);
@@ -39,6 +38,8 @@ void calc_coefficients(poly_t p){
 
     mpz_sub(p->c, p->op1, p->N);
     mpz_divexact(p->c, p->c, p->a);
+
+    mpz_clears(x1, x2, NULL);
 }
 
 void get_next_poly(poly_t p){
@@ -77,10 +78,18 @@ void calc_poly(poly_t p, mpz_t x){
     mpz_mul(p->zi, p->a, x);
     mpz_add(p->zi, p->zi, p->b);
     
-    mpz_mul(p->qx, p->zi, p->zi);
-    mpz_sub(p->qx, p->qx, p->N);
+    mpz_mul(p->qx, x, x);
+    mpz_mul(p->qx, p->qx, p->a);
 
-    assert(mpz_divisible_p(p->qx, p->a) != 0);
-    mpz_divexact(p->qx, p->qx, p->a);
+    mpz_mul(p->op1, p->b, x);
+    mpz_mul_ui(p->op1, p->op1, 2);
+    mpz_add(p->qx, p->qx, p->op1);
+
+    mpz_add(p->qx, p->qx, p->c);
+
 }
 
+void free_poly(poly_t p){
+    mpz_clears(p->d, p->N, p->a, p->b, p->c, p->op1, p->op2, p->op3, p->zi, p->qx, NULL);
+    free(p);
+}
