@@ -41,34 +41,45 @@ void* sieve_100_polys (void* args){
         for(int i = 1; i<arg->pb_len; i++){
             mpz_set_ui(pi, arg->pb[i]);
             mpz_gcdext(g, m, n, Q->a, pi);
-            assert(mpz_cmp_ui(g, 1) == 0);
+            if(mpz_cmp_ui(g, 1) != 0){
+                fprintf(stderr, "ERROR: Number is too small for the current implementation of MPQS\n");
+                exit(1);
+            }
+
             mpz_set_ui(temp, arg->r[i]);
             mpz_sub(temp, temp, Q->b);
             mpz_mul(temp, temp, m);
             mpz_mod(temp, temp, pi);
+            
             x1[i] = mpz_get_ui(temp);
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
+
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
+            
             mpz_set_ui(temp, arg->pb[i]);
             mpz_sub_ui(temp, temp, arg->r[i]);
             mpz_sub(temp, temp, Q->b);
             mpz_mul(temp, temp, m);
             mpz_mod(temp, temp, pi);
+            
             x2[i] = mpz_get_ui(temp);
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
+            
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
 
             //realign sieving interval to [-s, s]
             int k = (x1[i] + arg->s)/arg->pb[i];
             x1[i] -= k * arg->pb[i];
             x1[i] += arg->s;
+
             k = (x2[i] + arg->s)/arg->pb[i];
             x2[i] -= k * arg->pb[i];
             x2[i] += arg->s;
-            mpz_set_si(temp, -arg->s);
-            mpz_add_ui(temp, temp, x1[i]);
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
+            
+            //mpz_set_si(temp, -arg->s);
+            //mpz_add_ui(temp, temp, x1[i]);
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, arg->pb[i]) != 0);
         }
 
         //reset sieveing_interval
@@ -98,6 +109,7 @@ void* sieve_100_polys (void* args){
         pthread_mutex_lock(&mutex);
         for(int i = 0; i<2*arg->s && *(arg->relations_found) < arg->pb_len + arg->extra; i++){
             if(sinterval[i] > arg->t){
+                *(arg->tries) += 1;
                 mpz_set_si(x, -arg->s);
                 mpz_add_ui(x, x, i);
                 calc_poly(Q, x);
@@ -112,7 +124,7 @@ void* sieve_100_polys (void* args){
                         update_time = true;
                         if(!arg->quiet){
                             printf("\r");
-                            printf("%.1f%%", (float)(*(arg->relations_found))/(arg->pb_len+arg->extra)*100);
+                            printf("%.1f%% | %.1f%%", (float)(*(arg->relations_found))/(arg->pb_len+arg->extra)*100, (float)(*(arg->relations_found))/(*(arg->tries))*100);
                             fflush(stdout);
                         }
                     }
@@ -172,6 +184,7 @@ int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra,
     pthread_t* threads = malloc(8*sizeof(pthread_t));
     
     int relations_found = 0;
+    uint_fast64_t tries = 0;
     struct timeval begin;
     gettimeofday(&begin, 0);
     while(relations_found < pb_len + extra){
@@ -190,7 +203,8 @@ int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra,
                 z,
                 d,
                 Q,
-                begin
+                begin,
+                &tries
             };
             pthread_create(threads+i, NULL, sieve_100_polys, args+i);
 

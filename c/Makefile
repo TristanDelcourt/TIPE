@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -g
+CFLAGS := -Wall -Wextra -g -Ofast -Wno-maybe-uninitialized
 CLINKS := -lgmp -lm
 DIR := ./bin
 
@@ -31,9 +31,6 @@ polynomial.o: dir ./mpqs/polynomial.c ./mpqs/polynomial.h
 common_mpqs.o: dir ./mpqs/common_mpqs.c ./mpqs/common_mpqs.h
 	$(CC) $(CFLAGS) -c ./mpqs/common_mpqs.c -o $(DIR)/common_mpqs.o $(CLINKS)
 
-parallel_mpqs.o: dir ./mpqs/parallel_mpqs.c ./mpqs/parallel_mpqs.h
-	$(CC) $(CFLAGS) -c ./mpqs/parallel_mpqs.c -o $(DIR)/parallel_mpqs.o $(CLINKS)
-
 # Algorithms
 
 qsieve.o: ./qsieve/qsieve.c ./qsieve/qsieve.h
@@ -44,6 +41,9 @@ dixon.o: ./dixon/dixon.c ./dixon/dixon.h
 
 mpqs.o: ./mpqs/mpqs.c ./mpqs/mpqs.h
 	$(CC) $(CFLAGS) -c ./mpqs/mpqs.c -o $(DIR)/mpqs.o $(CLINKS)
+
+parallel_mpqs.o: dir ./mpqs/parallel_mpqs.c ./mpqs/parallel_mpqs.h
+	$(CC) $(CFLAGS) -c ./mpqs/parallel_mpqs.c -o $(DIR)/parallel_mpqs.o $(CLINKS)
 
 factor: dir list_matrix_utils.o vector.o system.o factorbase.o tonellishanks.o polynomial.o parse_input.o qsieve.o dixon.o mpqs.o common_mpqs.o parallel_mpqs.o
 	$(CC) $(CFLAGS) main.c \

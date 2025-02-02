@@ -204,11 +204,13 @@ void factor(input_t* input){
                 break;
         }
 
+        // TEST
         mpz_set(test1, Z1);
         mpz_mul(test1, test1, test1);
         mpz_set(test2, Z2);
         mpz_mul(test2, test2, test2);
         assert(mpz_congruent_p(test1, test2, input->N) != 0);
+        // END TEST
 
         mpz_sub(f, Z1, Z2);
         mpz_gcd(f, f, input->N);

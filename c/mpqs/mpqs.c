@@ -74,7 +74,10 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
         for(int i = 1; i<pb_len; i++){
             mpz_set_ui(pi, pb[i]);
             mpz_gcdext(g, m, n, Q->a, pi);
-            assert(mpz_cmp_ui(g, 1) == 0);
+            if(mpz_cmp_ui(g, 1) != 0){
+                fprintf(stderr, "ERROR: Number is too small for the current implementation of MPQS\n");
+                exit(1);
+            }
 
             mpz_set_ui(temp, r[i]);
             mpz_sub(temp, temp, Q->b);
@@ -83,8 +86,8 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
 
             x1[i] = mpz_get_ui(temp);
 
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
 
             mpz_set_ui(temp, pb[i]);
             mpz_sub_ui(temp, temp, r[i]);
@@ -94,8 +97,8 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
 
             x2[i] = mpz_get_ui(temp);
 
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
 
             
             //realign sieving interval to [-s, s]
@@ -107,10 +110,10 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
             x2[i] -= k * pb[i];
             x2[i] += s;
 
-            mpz_set_si(temp, -s);
-            mpz_add_ui(temp, temp, x1[i]);
-            calc_poly(Q, temp);
-            assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
+            //mpz_set_si(temp, -s);
+            //mpz_add_ui(temp, temp, x1[i]);
+            //calc_poly(Q, temp);
+            //assert(mpz_divisible_ui_p(Q->qx, pb[i]) != 0);
         }
 
         for(int i = 0; i<2*s; i++){

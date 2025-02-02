@@ -2,6 +2,7 @@
 #include <gmp.h>
 #include "polynomial.h"
 #include <sys/time.h>
+#include <stdint.h>
 
 struct sieve_arg_s {
     int* pb;
@@ -18,6 +19,7 @@ struct sieve_arg_s {
     mpz_t* d;
     poly_t Qinit;
     struct timeval begin;
+    uint_fast64_t* tries;
 };
 typedef struct sieve_arg_s sieve_arg_t;
 
