@@ -82,6 +82,7 @@ input_t* parse_input(int argc, char** argv){
                 if(strcmp(argv[i], "dixon") == 0) input->algorithm = DIXON;
                 else if(strcmp(argv[i], "qsieve") == 0) input->algorithm = QSIEVE;
                 else if(strcmp(argv[i], "mpqs") == 0) input->algorithm = MPQS;
+                else if(strcmp(argv[i], "pmpqs") == 0) input->algorithm = PMPQS;
                 else return NULL;}
             else return NULL;
         }

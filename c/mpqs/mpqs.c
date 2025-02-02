@@ -7,58 +7,9 @@
 #include <time.h>
 
 #include "polynomial.h"
+#include "common_mpqs.h"
 #include "../system.h"
 #include "../tonellishanks.h"
-
-bool vectorize_mpqs(mpz_t n, int* v, int pb_len, int* pb){
-    /** Attemps naive factorisation to 'n' with the primes in
-     * the prime base 'pb' and putting the result into 'v', vector of powers of
-     * the primes in the prime base
-     * If it succeeds, returns true, otherwise, returns false
-    */
-    for(int i = 0; i<pb_len; i++){
-        v[i] = 0;
-    }
-    if(mpz_sgn(n)<0){
-        v[pb_len] = 1;
-        mpz_neg(n, n);
-    }
-    else{
-        v[pb_len] = 0;
-    }
-    
-    for(int i = 0; i<pb_len && (mpz_cmp_ui(n, 1) != 0); i++){
-        while (mpz_divisible_ui_p(n, pb[i])){
-            v[i]++;
-            mpz_divexact_ui(n, n, pb[i]);
-        }
-    }
-
-    if(mpz_cmp_ui(n, 1) == 0)
-        return true;
-    return false;
-}
-
-float* prime_logs_mpqs(int* pb, int pb_len){
-    float* plogs = malloc(pb_len*sizeof(float));
-    
-    for(int i = 0; i<pb_len; i++){
-        plogs[i] = log2(pb[i]);
-    }
-
-    return plogs;
-}
-
-int calculate_threshhold_mpqs(mpz_t sqrt_N, int s, int* pb, int pb_len){
-    
-    mpz_t qstart;
-    mpz_init_set_ui(qstart, s);
-    mpz_mul(qstart, qstart, sqrt_N);
-
-    int t = mpz_sizeinbase(qstart, 2) - (int) log2(pb[pb_len-1]);
-    mpz_clear(qstart);
-    return t;
-}
 
 int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, bool quiet){
     /** Gets pb_len+extra zis that are b-smooth, definied at:
@@ -198,18 +149,19 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
                 mpz_add_ui(x, x, i);
                 calc_poly(Q, x);
                 
-                found = vectorize_mpqs(Q->qx, v[relations_found], pb_len, pb);
-
-                if(found){
-                    mpz_set(z[relations_found], Q->zi);
-                    mpz_set(d[relations_found], Q->d);
-                    relations_found++;
-                    update_time = true;
-                    found = false;
-                    if(!quiet){
-                        printf("\r");
-                        printf("%.1f%% | %.1f%%", (float)relations_found/(pb_len+extra)*100, (float)relations_found/tries*100);
-                        fflush(stdout);
+                if(!already_added(Q->zi, z, relations_found)){
+                    found = vectorize_mpqs(Q->qx, v[relations_found], pb_len, pb);
+                    if(found){
+                        mpz_set(z[relations_found], Q->zi);
+                        mpz_set(d[relations_found], Q->d);
+                        relations_found++;
+                        update_time = true;
+                        found = false;
+                        if(!quiet){
+                            printf("\r");
+                            printf("%.1f%% | %.1f%%", (float)relations_found/(pb_len+extra)*100, (float)relations_found/tries*100);
+                            fflush(stdout);
+                        }
                     }
                 }
             }

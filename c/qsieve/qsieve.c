@@ -94,7 +94,7 @@ int** qsieve(mpz_t* z, mpz_t N, int pb_len, int* pb, int extra, int s, bool quie
     mpz_mul(temp, temp, temp);
     mpz_sub(temp, temp, N);
     x1[0] = 0;
-    if(mpz_divisible_ui_p(temp, 2) != 0) x1[0] = 1;
+    if(mpz_divisible_ui_p(temp, 2) == 0) x1[0] = 1;
 
     int sol1, sol2;
     for(int i = 1; i < pb_len; i++){

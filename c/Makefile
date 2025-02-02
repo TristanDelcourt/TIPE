@@ -28,6 +28,12 @@ parse_input.o: dir parse_input.c parse_input.h
 polynomial.o: dir ./mpqs/polynomial.c ./mpqs/polynomial.h
 	$(CC) $(CFLAGS) -c ./mpqs/polynomial.c -o $(DIR)/polynomial.o $(CLINKS)
 
+common_mpqs.o: dir ./mpqs/common_mpqs.c ./mpqs/common_mpqs.h
+	$(CC) $(CFLAGS) -c ./mpqs/common_mpqs.c -o $(DIR)/common_mpqs.o $(CLINKS)
+
+parallel_mpqs.o: dir ./mpqs/parallel_mpqs.c ./mpqs/parallel_mpqs.h
+	$(CC) $(CFLAGS) -c ./mpqs/parallel_mpqs.c -o $(DIR)/parallel_mpqs.o $(CLINKS)
+
 # Algorithms
 
 qsieve.o: ./qsieve/qsieve.c ./qsieve/qsieve.h
@@ -39,7 +45,7 @@ dixon.o: ./dixon/dixon.c ./dixon/dixon.h
 mpqs.o: ./mpqs/mpqs.c ./mpqs/mpqs.h
 	$(CC) $(CFLAGS) -c ./mpqs/mpqs.c -o $(DIR)/mpqs.o $(CLINKS)
 
-factor: dir list_matrix_utils.o vector.o system.o factorbase.o tonellishanks.o polynomial.o parse_input.o qsieve.o dixon.o mpqs.o
+factor: dir list_matrix_utils.o vector.o system.o factorbase.o tonellishanks.o polynomial.o parse_input.o qsieve.o dixon.o mpqs.o common_mpqs.o parallel_mpqs.o
 	$(CC) $(CFLAGS) main.c \
 		$(DIR)/list_matrix_utils.o \
 		$(DIR)/vector.o \
@@ -51,6 +57,8 @@ factor: dir list_matrix_utils.o vector.o system.o factorbase.o tonellishanks.o p
 		$(DIR)/qsieve.o \
 		$(DIR)/dixon.o \
 		$(DIR)/mpqs.o \
+		$(DIR)/common_mpqs.o \
+		$(DIR)/parallel_mpqs.o \
 		-o $(DIR)/factor $(CLINKS)
 
 # clean

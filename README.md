@@ -5,7 +5,8 @@
 This repo gives possible implementations of algorithms that are used to factor a large number into its prime factors. I have implemented 2 of those algorithms so far, these being:
 
 * Dixon's algorithm
-* The quadritc sieve (unfinished)
+* The quadritc sieve (qsieve)
+* The multipolynomial quadratic sieve (mpqs)
 
 You are able to use these algorithms from a single executable which I will present later
 
@@ -17,6 +18,8 @@ The main parts of the algorithms implemented, as well as how to use them, are as
     * [dixon.c](./c/dixon/dixon.c)
 * [qsieve/](./c/qsieve)
     * [qsieve.c](./c/qsieve/qsieve.c)
+* [mpqs/](./c/mpqs)
+    * [mpqs.c](./c/mpqs/mpqs.c)
 * [Makefile](./c/Makefile)
 * [main.c](./c/main.c)
 
@@ -30,7 +33,7 @@ To build the program, run the [Makefile](./c/Makefile). After doing this, the fa
 This is the number to factor, the only required argument
 
 `--type %arg%` (or `-t %arg%`) 
-This sets what algorithm to use, currently these are 'dixon' or 'qsieve'
+This sets what algorithm to use, currently these are 'dixon', 'qsieve' or 'mpqs'
 
 `--bound %int%` (or `-b %int%`) 
 This sets the upper bound for the largest prime number to be used in the prime base

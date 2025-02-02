@@ -54,7 +54,6 @@ poly_t init_poly(mpz_t N, int M){
     poly_t p = malloc(sizeof(struct poly_s));
 
     mpz_inits(p->d, p->N, p->a, p->b, p->c, p->op1, p->op2, p->op3, p->zi, p->qx, NULL);
-    p->done_iter = false;
     mpz_set(p->N, N);
 
     // choose value of d according to 2.4.2
@@ -92,4 +91,19 @@ void calc_poly(poly_t p, mpz_t x){
 void free_poly(poly_t p){
     mpz_clears(p->d, p->N, p->a, p->b, p->c, p->op1, p->op2, p->op3, p->zi, p->qx, NULL);
     free(p);
+}
+
+poly_t copy_poly(poly_t p){
+    poly_t cpy = malloc(sizeof(struct poly_s));
+
+    mpz_inits(cpy->d, cpy->N, cpy->a, cpy->b, cpy->c, cpy->op1, cpy->op2, cpy->op3, cpy->zi, cpy->qx, NULL);
+    
+    mpz_set(cpy->d, p->d);
+    mpz_set(cpy->N, p->N);
+
+    mpz_set(cpy->a, p->a);
+    mpz_set(cpy->b, p->b);
+    mpz_set(cpy->c, p->c);
+
+    return cpy;
 }

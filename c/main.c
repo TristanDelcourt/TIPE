@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <gmp.h>
-#include <time.h>
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -11,11 +11,16 @@
 #include "list_matrix_utils.h"
 
 // Include algorithms
+// Dixon's method
 #include "./dixon/dixon.h"
+
+// The Quadratic Sieve
 #include "./qsieve/qsieve.h"
 
+// Multipolynomial Quadratic Sieve
 #include "./mpqs/polynomial.h"
 #include "./mpqs/mpqs.h"
+#include "./mpqs/parallel_mpqs.h"
 
 
 /**
@@ -78,7 +83,6 @@ void sum_lignes(int* sum, int** v, system_t s){
 }
 
 void factor(input_t* input){
-
     int piB = pi(input->bound);
     if(!input->quiet) printf("pi(B) = %d\n", piB);
     int* p = primes(piB, input->bound);
@@ -101,6 +105,12 @@ void factor(input_t* input){
             if(!input->quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
             free(p);
             break;
+        case PMPQS:
+            pb = prime_base(input->N, &pb_len, p, piB);
+            pb[pb_len] = -1;
+            if(!input->quiet) printf("base reduction %f%%\n", (float)pb_len/piB*100);
+            free(p);
+            break;
     }
     int target_nb = pb_len + input->extra;
 
@@ -112,7 +122,8 @@ void factor(input_t* input){
     //Getting zis
     int** v;
     mpz_t* d;
-    clock_t t1 = clock();
+    struct timeval t1, t2;
+    gettimeofday(&t1, 0);
     switch(input->algorithm){
         case DIXON:
             v = dixon(z, input->N, pb_len, pb, input->extra, input->quiet);
@@ -127,9 +138,19 @@ void factor(input_t* input){
             }
             v = mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
             break;
+        case PMPQS:
+            d = malloc(target_nb*sizeof(mpz_t));
+            for(int i = 0; i < target_nb; i++){
+                mpz_init(d[i]);
+            }
+            v = parallel_mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
+            break;
     }
-    clock_t t2 = clock();
-    double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
+
+    gettimeofday(&t2, 0);
+    long seconds = t2.tv_sec - t1.tv_sec;
+    long microseconds = t2.tv_usec - t1.tv_usec;
+    double time_spent = seconds + microseconds*1e-6;
     if(!input->quiet) printf("Time to get zi: %fs\n", time_spent);
     
     mpz_t f, Z1, Z2, test1, test2;
@@ -148,6 +169,11 @@ void factor(input_t* input){
             sum = malloc(pb_len*sizeof(int));
             break;
         case MPQS:
+            // for -1
+            s = init_gauss(v, target_nb, pb_len+1);
+            sum = malloc((pb_len+1)*sizeof(int));
+            break;
+        case PMPQS:
             // for -1
             s = init_gauss(v, target_nb, pb_len+1);
             sum = malloc((pb_len+1)*sizeof(int));
@@ -171,6 +197,9 @@ void factor(input_t* input){
                 rebuild(Z2, sum, pb, pb_len);
                 break;
             case MPQS:
+                rebuild_mpqs(Z2, d, sum, pb, pb_len, s);
+                break;
+            case PMPQS:
                 rebuild_mpqs(Z2, d, sum, pb, pb_len, s);
                 break;
         }
@@ -213,10 +242,21 @@ void factor(input_t* input){
         mpz_clear(z[i]);
     }
     free(z);
-    for(int i = 0; i < target_nb; i++){
-        mpz_clear(d[i]);
+    switch(input->algorithm){
+        case DIXON:
+            break;
+        case QSIEVE:
+            break;
+        case MPQS:
+            for(int i = 0; i < target_nb; i++) mpz_clear(d[i]);
+            free(d);
+            break;
+        case PMPQS:
+            for(int i = 0; i < target_nb; i++) mpz_clear(d[i]);
+            free(d);
+            break;
     }
-    free(d);
+    
 
     mpz_clears(f, Z1, Z2, test1, test2, NULL);
 }
@@ -237,10 +277,13 @@ int main(int argc, char** argv){
     if(input->sieving_interval == -1) input->sieving_interval = 100000;
     if(input->extra == -1) input->extra = 1;
 
-    clock_t t1 = clock();
+    struct timeval t1, t2;
+    gettimeofday(&t1, 0);
     factor(input);
-    clock_t t2 = clock();
-    double time_spent = (double)(t2 - t1) / CLOCKS_PER_SEC;
+    gettimeofday(&t2, 0);
+    long seconds = t2.tv_sec - t1.tv_sec;
+    long microseconds = t2.tv_usec - t1.tv_usec;
+    double time_spent = seconds + microseconds*1e-6;
     if(!input->quiet) printf("Total time: %fs\n", time_spent);
 
     free_input(input);
