@@ -11,6 +11,7 @@ typedef struct input_s {
     bool quiet;
     TYPE algorithm;
     int extra;
+    int delta;
 } input_t;
 
 input_t* parse_input(int argc, char** argv);

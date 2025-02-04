@@ -11,7 +11,7 @@
 #include "../system.h"
 #include "../tonellishanks.h"
 
-int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, bool quiet){
+int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, int delta, bool quiet){
     /** Gets pb_len+extra zis that are b-smooth, definied at:
      * Quadratic sieve factorisation algorithm
      * Bc. Ondˇrej Vladyka
@@ -34,6 +34,7 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
     }
     float* sinterval = malloc(2*s*sizeof(float));
     float* plogs = prime_logs_mpqs(pb, pb_len);
+    int t = calculate_threshhold_mpqs(sqrt_N, s, pb, pb_len, delta);
 
     
     // TESTS
@@ -45,9 +46,6 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
     int* r = malloc(pb_len*sizeof(int));
     int* x1 = malloc(pb_len*sizeof(int));
     int* x2 = malloc(pb_len*sizeof(int));
-
-    // find solution for 2
-    
 
     int sol1, sol2;
     for(int i = 1; i < pb_len; i++){
@@ -120,14 +118,16 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
             sinterval[i] = 0;
         }
 
+        /*
         // sieve for 2
         while(x1[0]<2*s){
             sinterval[x1[0]] += plogs[0];
             x1[0] += pb[0];
         }
+        */
 
         // sieve other primes
-        for(int i = 1; i < pb_len; i++){
+        for(int i = 30; i < pb_len; i++){
 
             while(x1[i]<2*s){
                 sinterval[x1[i]] += plogs[i];
@@ -140,8 +140,6 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, b
             }
         }
 
-        int t = calculate_threshhold_mpqs(sqrt_N, s, pb, pb_len);
-        //printf("t = %d\n", t);
 
         bool found;
         bool update_time = false;

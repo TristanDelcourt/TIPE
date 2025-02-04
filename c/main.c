@@ -136,14 +136,14 @@ void factor(input_t* input){
             for(int i = 0; i < target_nb; i++){
                 mpz_init(d[i]);
             }
-            v = mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
+            v = mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->delta, input->quiet);
             break;
         case PMPQS:
             d = malloc(target_nb*sizeof(mpz_t));
             for(int i = 0; i < target_nb; i++){
                 mpz_init(d[i]);
             }
-            v = parallel_mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->quiet);
+            v = parallel_mpqs(z, d, input->N, pb_len, pb, input->extra, input->sieving_interval, input->delta, input->quiet);
             break;
     }
 

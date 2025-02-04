@@ -87,13 +87,16 @@ void* sieve_100_polys (void* args){
             sinterval[i] = 0;
         }
 
+        /*
         // sieve for 2
         while(x1[0]<2*arg->s){
             sinterval[x1[0]] += arg->plogs[0];
             x1[0] += arg->pb[0];
         }
+        */
+
         // sieve other primes
-        for(int i = 1; i < arg->pb_len; i++){
+        for(int i = 30; i < arg->pb_len; i++){
             while(x1[i]<2*arg->s){
                 sinterval[x1[i]] += arg->plogs[i];
                 x1[i] += arg->pb[i];
@@ -147,10 +150,11 @@ void* sieve_100_polys (void* args){
     free(sinterval);
     free_poly(Q);
 
+    arg->threads_running[arg->thread_id] = false;
     return NULL;
 }
 
-int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, bool quiet){
+int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, int delta, bool quiet){
     /** Gets pb_len+extra zis that are b-smooth, definied at:
      * Quadratic sieve factorisation algorithm
      * Bc. Ondˇrej Vladyka
@@ -178,10 +182,14 @@ int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra,
         tonelli_shanks_ui(N, pb[i], &sol1, &sol2);
         r[i] = sol1;
     }
-    int t = calculate_threshhold_mpqs(sqrt_N, s, pb, pb_len);
+    int t = calculate_threshhold_mpqs(sqrt_N, s, pb, pb_len, delta);
 
     sieve_arg_t* args = malloc(8*sizeof(sieve_arg_t));
     pthread_t* threads = malloc(8*sizeof(pthread_t));
+    bool* threads_running = malloc(8*sizeof(bool));
+    for(int i = 0; i<8; i++){
+        threads_running[i] = false;
+    }
     
     int relations_found = 0;
     uint_fast64_t tries = 0;
@@ -189,40 +197,45 @@ int** parallel_mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra,
     gettimeofday(&begin, 0);
     while(relations_found < pb_len + extra){
         for(int i = 0; i<8; i++){
-            args[i] = (sieve_arg_t) {
-                pb,
-                pb_len,
-                extra,
-                r,
-                plogs,
-                s,
-                t,
-                &relations_found,
-                v,
-                quiet,
-                z,
-                d,
-                Q,
-                begin,
-                &tries
-            };
-            pthread_create(threads+i, NULL, sieve_100_polys, args+i);
-
+            if(!threads_running[i]){
+                args[i] = (sieve_arg_t) {
+                    pb,
+                    pb_len,
+                    extra,
+                    r,
+                    plogs,
+                    s,
+                    t,
+                    &relations_found,
+                    v,
+                    quiet,
+                    z,
+                    d,
+                    Q,
+                    begin,
+                    &tries,
+                    i,
+                    threads_running
+                };
+                threads_running[i] = true;
+                pthread_create(threads+i, NULL, sieve_100_polys, args+i);
+            }
             for(int i = 0; i<100; i++){
                 get_next_poly(Q);
             }
         }
-
-        for(int i = 0; i<8; i++){
-            pthread_join(threads[i], NULL);
-        }
     }
     if(!quiet) printf("\n");
+
+    for(int i = 0; i<8; i++){
+        pthread_join(threads[i], NULL);
+    }
 
     free(threads);
     free(args);
     free(r);
     free(plogs);
+    free(threads_running);
     free_poly(Q);
     mpz_clear(sqrt_N);
 

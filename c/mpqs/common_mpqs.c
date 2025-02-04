@@ -2,14 +2,15 @@
 #include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-int calculate_threshhold_mpqs(mpz_t sqrt_N, int s, int* pb, int pb_len){
+int calculate_threshhold_mpqs(mpz_t sqrt_N, int s, int* pb, int pb_len, int delta){
     
     mpz_t qstart;
     mpz_init_set_ui(qstart, s);
     mpz_mul(qstart, qstart, sqrt_N);
 
-    int t = mpz_sizeinbase(qstart, 2) - (int) log2(pb[pb_len-1]);
+    int t = mpz_sizeinbase(qstart, 2) - (int) log2(pb[pb_len-1]) - delta;
     mpz_clear(qstart);
     return t;
 }

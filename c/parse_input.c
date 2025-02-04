@@ -12,6 +12,7 @@ input_t* init_input(void){
     input->extra = -1;
     input->quiet = false;
     input->algorithm = QSIEVE;
+    input->delta = 0;
     mpz_init_set_ui(input->N, 0);
     return input;
 }
@@ -66,6 +67,14 @@ input_t* parse_input(int argc, char** argv){
             i++;
             if(i<argc){
                 if(valid_int(argv[i])) mpz_set_str(input->N, argv[i], 10);
+                else return NULL;}
+            else return NULL;
+        }
+
+        else if(strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--delta") == 0){
+            i++;
+            if(i<argc){
+                if(valid_int(argv[i])) input->delta = atoi(argv[i]);
                 else return NULL;}
             else return NULL;
         }
