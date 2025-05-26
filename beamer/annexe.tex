@@ -1,0 +1,72 @@
+{
+\UseRawInputEncoding
+
+%Make plain
+\setbeamertemplate{headline}{}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+%
+
+%Set code colours and style
+\definecolor{keywordsColour}{RGB}{0, 0, 255}
+\definecolor{stringsColour}{RGB}{162, 13, 13}
+\definecolor{commentsColour}{RGB}{0, 127, 0}
+\definecolor{identifierColour}{RGB}{0, 0, 0}
+
+\lstdefinestyle{fullStyle}{
+    breaklines=true,
+    columns=fullflexible,
+    language=C,
+    basicstyle=\tiny,
+    keywordstyle=\bfseries\color{keywordsColour},
+    commentstyle=\itshape\color{commentsColour},
+    identifierstyle=\color{identifierColour},
+    stringstyle=\color{stringsColour},
+}
+%
+
+% Import code command
+\newcommand{\importcode}[1]{
+    \begin{flushright}\textit{#1}\end{flushright}
+    \begin{multicols}{2}
+        \lstinputlisting[style=fullStyle]{#1}
+    \end{multicols}
+    \pagebreak
+}
+%
+
+\begin{frame}{Présentation}
+    Les derniers codes sont tous accessibles depuis mon \href{https://github.com/TristanDelcourt/TIPE}{GitHub}
+\end{frame}
+
+\subsection*{Codes}
+
+\importcode{../c/vector.h}
+\importcode{../c/vector.c}
+\importcode{../c/tonellishanks.h}
+\importcode{../c/tonellishanks.c}
+\importcode{../c/system.h}
+\importcode{../c/system.c}
+\importcode{../c/parse\_input.h}
+\importcode{../c/parse\_input.c}
+\importcode{../c/list\_matrix\_utils.h}
+\importcode{../c/list\_matrix\_utils.c}
+\importcode{../c/factorbase.h}
+\importcode{../c/factorbase.c}
+\importcode{../c/main.c}
+
+\importcode{../c/dixon/dixon.h}
+\importcode{../c/dixon/dixon.c}
+
+\importcode{../c/qsieve/qsieve.h}
+\importcode{../c/qsieve/qsieve.c}
+
+\importcode{../c/mpqs/common\_mpqs.h}
+\importcode{../c/mpqs/common\_mpqs.c}
+\importcode{../c/mpqs/polynomial.h}
+\importcode{../c/mpqs/polynomial.c}
+\importcode{../c/mpqs/mpqs.h}
+\importcode{../c/mpqs/mpqs.c}
+\importcode{../c/mpqs/parallel\_mpqs.h}
+\importcode{../c/mpqs/parallel\_mpqs.c}
+}

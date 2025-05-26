@@ -45,6 +45,9 @@ This sets the interval used for the sieveing of the quadratic sieve (will be ign
 `--extra %int%` (or `-e %int%`) 
 This sets the extra number of B-Smooth relations to find, by default this is 1
 
+`--delta %int%` (or `-d %int`)
+This sets the selectivity of the sieving interval (success rate shown as you try to factor a number), it is recommended to keep this pretty low, by default it is 0.
+
 `-o %file_path%` 
 This is the output file to send the results to if specified, otherwise it will print to the terminal
 

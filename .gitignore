@@ -5,3 +5,14 @@
 /tests/primes
 /tests/products
 **/vgcore*
+
+**/*.aux
+**/*.fdb_latexmk
+**/*.fls
+**/*.log
+**/*.nav
+**/*.out
+**/*.snm
+**/*.gz
+**/*.toc
+**/*.synctex(busy)

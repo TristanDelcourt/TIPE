@@ -173,7 +173,6 @@ int** mpqs(mpz_t* z, mpz_t* d, mpz_t N, int pb_len, int* pb, int extra, int s, i
     }
 
     if(!quiet) printf("\n");
-
     mpz_clears(sqrt_N, temp, g, m, n, pi, x, NULL);
     free(x1);
     free(x2);

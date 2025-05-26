@@ -275,7 +275,7 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    if(input->bound == -1) input->bound = 1000;
+    if(input->bound == -1) input->bound = 10000;
     if(input->sieving_interval == -1) input->sieving_interval = 100000;
     if(input->extra == -1) input->extra = 1;
 
