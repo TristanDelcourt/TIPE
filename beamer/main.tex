@@ -83,7 +83,7 @@
 \begin{frame}{Les nombres \textit{RSA}}
 
 \begin{itemize}
-    \item Factoriser $N = pq$ où $p$ et $q$ sont premiers et très grand.
+    \item Factoriser $N = pq$ où $p$ et $q$ sont premiers et très grands.
     \item Dernier nombre non factorisé: RSA-260 (260 chiffres)
         \newline
         \newline
@@ -116,16 +116,6 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \end{frame}
 
 \subsection{Etapes de la méthode}
-\begin{frame}{Principe de l'algorithme}
-    Chercher $x$ et $y$ tel que $x^2 \equiv y^2 \pmod N$ et trouver des facteurs en 3 étapes:
-
-    \begin{itemize}
-        \item Construire $x$ \textbf{le plus efficacement possible}.
-        \item Avec $x$, on construit $y$ pour avoir la congruence.
-        \item Calculer $N \land (x-y)$ et $N\land (x+y)$.
-    \end{itemize}
-    
-\end{frame}
 
 \input{diagrams/anim_construction_x_y}
 
@@ -135,7 +125,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
         $$
         \exists (\lambda_i)_{i \in \llbracket 1,b+1 \rrbracket}\in \mathbb \{0,1\}^{b+1} \mid \sum_{i=1}^{b+1} \lambda_iv_i = 0_{\mathbb F_2^b} = (2\alpha_1, \dots, 2\alpha_b)
         $$
-        On pose $y = \prod_{j=1}^b p_j^{\alpha_j}$ et $x = \prod_{j=1}^{b+1}x_i^{\lambda_i}$ 
+        On pose $y = \prod_{j=1}^b p_j^{\alpha_j}$ et $x = \prod_{j=1}^{b+1}x_j^{\lambda_j}$ 
         \item On peut trouver les $\lambda_i$ avec un système que l'on résout avec un \textbf{pivot de Gauss}.
     \end{itemize}
     \uncover<+->{\begin{block}{Résultat admis (calcul)}
@@ -167,8 +157,6 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \end{frame}
 
 \begin{frame}
-
-
 
 \uncover<+->{    
     \begin{block}{}
@@ -219,11 +207,11 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 }
 \end{frame}
 
-\begin{frame}{Ce qu'il faur retenir}
+\begin{frame}{Ce qu'il faut retenir}
     \begingroup
     \setbeamercolor{block title}{bg=pink, fg=black}
     \begin{block}{Le résultat principal}
-        Étant donné $b\in \mathbb B$, trouver $b+1$ nombres tel que $\forall j\in\llbracket 1, b+1\rrbracket, x_j^2 \pmod N$ a ses facteurs premiers inferieurs à $p_b$
+        Étant donné $b\in \mathbb B$, trouver $b+1$ nombres tels que $\forall j\in\llbracket 1, b+1\rrbracket, x_j^2 \pmod N$ a ses facteurs premiers inferieurs à $p_b$
     \end{block}
     \endgroup
 \end{frame}
@@ -260,7 +248,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
     \caption{Factorisation par la méthode de Dixon}
     \begin{algorithmic}[1]
         \Require{$N \in \mathbb N$ composé, $B \in \mathbb N$}
-        \Ensure{$p$ et $q$ et tel que $p\mid N$ et $q\mid N$}
+        \Ensure{$p$ et $q$, tels que $p\mid N$ et $q\mid N$}
         \Statex
         \State $b \gets\pi(B)$
         \State $(v_i)_{i \in \llbracket 1,b+1 \rrbracket}, (x_i)_{i \in \llbracket 1,b+1 \rrbracket} \gets Recherche BFriables(N, b)$
@@ -273,14 +261,14 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
     \end{algorithm}
 \end{frame}
 
-\begin{frame}{Etude théorique (Louise Ngyuen)}
+\begin{frame}{Etude théorique (Louise Nguyen)}
     \begin{block}{Une minoration de la densité des $B$-friables}
     Soit $B : \mathbb N^\ast \to \mathbb N^\ast$ une fonction telle que $\ln n = o(B(n))$ et $\ln B(n) = o (\ln n)$. Alors on a, pour $n \to +\infty$,
     \[
     \Psi(B(n), n) \ge n\exp\left(\left(\frac {\ln n}{\ln B(n)} \ln \ln n\right)(-1 + o(1))\right)
     \]
     \end{block}
-    \begin{block}{Une complexité sous-exponentiel}
+    \begin{block}{Une complexité sous-exponentielle}
     \[
     \exp\left((1+ o(1))2{\sqrt 2} (\ln n \ln \ln n)^{1/2}\right)
     \]
@@ -288,17 +276,17 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
     \end{block}
 \end{frame}
 
-\section{Optimisiations}
+\section{Optimisations}
 \subsection{Crible Quadratique}
 
 \begin{frame}{Principe}
     \begin{itemize}[<+->]
         \item Utilisation d'un polynôme $Q = (\sqrt N + X)^2 - N$ pour générer les $x_i$
-        \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce a Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
+        \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce à Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
         \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$. En effet, 
         \begin{align*}
-            Q(x+kp) &= (\sqrt n + x+kp)^2 - N \\
-                    &= Q(x) + 2kp(\sqrt n + x) + k^2p^2
+            Q(x+kp) &= (\sqrt N + x+kp)^2 - N \\
+                    &= Q(x) + 2kp(\sqrt N + x) + k^2p^2
         \end{align*}
         d'où $p|Q(x+kp)$
         \item Cribler sur un intervalle $\llbracket 1,S \rrbracket$, puis sur $\llbracket S+1,2S \rrbracket$ etc...
@@ -317,7 +305,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
         \State{$T \gets$ tableau tel que $T[i] \gets (i+\lfloor \sqrt N \rfloor)^2 - N$ pour $i\in \llbracket 1, S\rrbracket$}
         \State{$V \gets$ tableau tel que $V[i] \gets (0,\dots,0) \in \mathbb N^b$ pour $i\in \llbracket 1, S\rrbracket$}
 
-        \For{$p \in \{p_1, \dots, p_b\}$ tel que $n$ est un carré modulo $p$}
+        \For{$p \in \{p_1, \dots, p_b\}$ tel que $N$ est un carré modulo $p$}
             \State{$x_1, x_2 \gets$ les racines de $(X+\lfloor \sqrt N\rfloor)^2 - N$ modulo $p$}
             \For{$i \in \{1,2\}$}
                 % \State{$q \gets x_i + \lfloor (a-x_i)/p\rfloor p$} \Comment{Premier nombre $\equiv x_i \pmod p$ qui est $\ge a$}
@@ -344,8 +332,8 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
         \item $Q(x) = \prod_{i=1}^k p_i^{\alpha_i}$, soit $\ln(Q(x)) = \sum_{i=1}^k \alpha_i \ln(p_i)$.
         \newline \underline{Idée}: soustraire par $\alpha_i \ln(p_i)$ au lieu de diviser par $p_i^{\alpha_i}$
         \item $\log_2(Q(x)) \approx \text{nb\_bits}(Q(x))$
-        \item \underline{Problème}: on connaît pas $\alpha_i$. 
-        \newline \underline{Solution}: on soustrait par $\log_2(p_i)$ seulement. Des approximations necéssitent déjà un \textbf{seuil}
+        \item \underline{Problème}: on ne connaît pas $\alpha_i$. 
+        \newline \underline{Solution}: on soustrait par $\log_2(p_i)$ seulement. Des approximations nécessitent déjà un \textbf{seuil}
     \end{itemize}
 \end{frame}
 
@@ -365,7 +353,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 
 \begin{frame}{Résultats}
-    Apres plusieurs centaines de tests, on a les résultats suivants:
+    Après plusieurs centaines de tests, on a les résultats suivants:
     \newline
     \newline
     \begin{tabularx}{\textwidth}{|c||Y|Y|Y|}
