@@ -85,6 +85,14 @@
 \begin{itemize}
     \item Factoriser $N = pq$ où $p$ et $q$ sont premiers et très grand.
     \item Dernier nombre non factorisé: RSA-260 (260 chiffres)
+        \newline
+        \newline
+        $N=221128255295296664352810852550262309276120895\allowbreak
+        0247001539441374831912882294140200198651272972656\allowbreak
+        9746599085900330031400051170742204560859276357953\allowbreak
+        7571859542988389587092292384910067030341246205457\allowbreak
+        8456641366454068421436129301769402084639106587591\allowbreak
+        4794251435144458199$
 \end{itemize}
 
 \end{frame}
@@ -93,8 +101,7 @@
 \subsection{Congruences de carrés}
 \begin{frame}{Congruence de carrés}
 
-$N = pq$, $p$ premier. Supp. $x^2 \equiv y^2 \pmod N$ et $x\neq\pm y$.
-\pause
+\uncover<+->{$N = pq$, $p$ premier. Supp. $x^2 \equiv y^2 \pmod N$ et $x\neq\pm y$.}
 \begin{itemize}[<+->]
 \item On a $x^2 - y^2 \equiv 0 \pmod N$ i.e. $N \mid (x-y)(x+y)$
 \item Donc $p \mid (x-y)(x+y)$
@@ -123,7 +130,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \input{diagrams/anim_construction_x_y}
 
 \begin{frame}{Construction de $y$ - Pivot de Gauss}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item On a $b+1$ vecteurs de $\mathbb F_2^b$ et $\mathbb F_2$ corps, cela donne un système lié:
         $$
         \exists (\lambda_i)_{i \in \llbracket 1,b+1 \rrbracket}\in \mathbb \{0,1\}^{b+1} \mid \sum_{i=1}^{b+1} \lambda_iv_i = 0_{\mathbb F_2^b} = (2\alpha_1, \dots, 2\alpha_b)
@@ -138,58 +145,52 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 
 
 \begin{frame}{Un exemple}
-
     \begin{itemize}
-        
-    \item $N = 20382493 = 3467 \times 5879$ et $b = 4$, $(2, 3, 5, 7)$
-    \item Ces $5=b+1$ nombres $x_j$ vérifient $ x_j^2 \pmod N = 2^{v_j^{(1)}}\cdots 7^{v_j^{(1)}}$:
-    \begin{center}
-        \begin{tabular}{|c|c|}
-            \hline
-            $x_j$ & $v_j$ \\
-            \hline \hline
-            $16853$ & $(6,5,2,2)$\\
-            \hline
-            $32877$ & $(3,0,7,0)$\\
-            \hline
-            $35261$ & $(3,2,1,0)$\\
-            \hline
-            $48834$ & $(0,2,3,1)$\\
-            \hline
-        \end{tabular}
-    \end{center}
-        %\begin{itemize}
-    %    \item $x_1 = 16853 \text{ avec } v_1 = (6,5,2,2)$
-    %    \item $x_2 = 32877 \text{ avec } v_2 = (3,0,7,0)$
-    %    \item $x_3 = 35261 \text{ avec } v_3 = (5,3,0,1)$
-    %    \item $x_4 = 56569 \text{ avec } v_4 = (3,2,1,0)$
-    %    \item $x_5 = 48834 \text{ avec } v_5 = (0,2,3,1)$
-    %\end{itemize}
-
+        \item $N = 20382493 = 3467 \times 5879$ et $b = 4$, $(2, 3, 5, 7)$
+        \item Ces $5=b+1$ nombres $x_j$ vérifient $ x_j^2 \pmod N = 2^{v_j^{(1)}}\cdots 7^{v_j^{(4)}}$:
+            \begin{center}
+                \begin{tabular}{|c|c|}
+                    \hline
+                    $x_j$ & $v_j$ \\
+                    \hline \hline
+                    $16853$ & $(6,5,2,2)$\\
+                    \hline
+                    $32877$ & $(3,0,7,0)$\\
+                    \hline
+                    $35261$ & $(3,2,1,0)$\\
+                    \hline
+                    $48834$ & $(0,2,3,1)$\\
+                    \hline
+                \end{tabular}
+            \end{center}
     \end{itemize}
 \end{frame}
 
 \begin{frame}
 
-\begin{block}{}
-{\footnotesize
-    \begin{columns}
-        \column{.7\textwidth}
-        \begin{itemize}
-        \item $N = 20382493 =$ \alert<6>{$3467$} $\times$ \alert<6>{$5879$} et $b = 4$.
-        \item $x_j^2 \pmod N = 2^{v_j^{(1)}}\cdots 7^{v_j^{(4)}}$ pour $j = 1,2,3,4,5$ ($5 = b+1$ relations)
-        \end{itemize}
-        \column{.3\textwidth}
-        \begin{tabular}{cc}
-                $x_j$ & $v_j$ \\
-                $16853$ & $(6,5,2,2)$\\
-                $32877$ & $(3,0,7,0)$\\
-                $35261$ & $(3,2,1,0)$\\
-                $48834$ & $(0,2,3,1)$\\
-        \end{tabular}
-        \end{columns}
+
+
+\uncover<+->{    
+    \begin{block}{}
+    {\footnotesize
+        \begin{columns}
+            \column{.7\textwidth}
+            \begin{itemize}
+            \item $N = 20382493 =$ \alert<6>{$3467$} $\times$ \alert<6>{$5879$} et $b = 4$.
+            \item $x_j^2 \pmod N = 2^{v_j^{(1)}}\cdots 7^{v_j^{(4)}}$ pour $j = 1,2,3,4,5$ ($5 = b+1$ relations)
+            \end{itemize}
+            \column{.3\textwidth}
+            \begin{tabular}{cc}
+                    $x_j$ & $v_j$ \\
+                    $16853$ & $(6,5,2,2)$\\
+                    $32877$ & $(3,0,7,0)$\\
+                    $35261$ & $(3,2,1,0)$\\
+                    $48834$ & $(0,2,3,1)$\\
+            \end{tabular}
+            \end{columns}
+    }
+    \end{block}
 }
-\end{block}
 
 {\small
 \begin{columns}
@@ -216,6 +217,15 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 
 \end{columns}
 }
+\end{frame}
+
+\begin{frame}{Ce qu'il faur retenir}
+    \begingroup
+    \setbeamercolor{block title}{bg=pink, fg=black}
+    \begin{block}{Le résultat principal}
+        Étant donné $b\in \mathbb B$, trouver $b+1$ nombres tel que $\forall j\in\llbracket 1, b+1\rrbracket, x_j^2 \pmod N$ a ses facteurs premiers inferieurs à $p_b$
+    \end{block}
+    \endgroup
 \end{frame}
 
 \subsection{L'algorithme final}
@@ -279,12 +289,12 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \end{frame}
 
 \section{Optimisiations}
-\subsection{Crible Quadratic}
+\subsection{Crible Quadratique}
 
 \begin{frame}{Principe}
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item Utilisation d'un polynôme $Q = (\sqrt N + X)^2 - N$ pour générer les $x_i$
-        \item Résolution de $Q(x) \equiv 0 \pmod p$ pour $p$ dans $FB$ grâce a Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
+        \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce a Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
         \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$. En effet, 
         \begin{align*}
             Q(x+kp) &= (\sqrt n + x+kp)^2 - N \\
@@ -329,42 +339,40 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 \subsection{Approximation logarithmique}
 
 \begin{frame}{Justification}
-    \begin{itemize}
-        \item L'opération d'addition est bien moins coûteuse ($O(n)$ au lieu de $O(n^2)$, voire $O(n\log n)$)
-        \item Si $Q(x) = \prod_{i=1}^k p_i^{\alpha_i}$, $\ln(Q(x)) = \sum_{i=1}^k \alpha_i \ln(p_i)$. Alors dans le crible on peut soustraire $\alpha_i \ln(p_i)$ au lieu de diviser par $p_i^{\alpha_i}$
-        \item $\log_2(Q(x)) \approx \text{nb\_bits}(Q(x))$, ce qui permet l'approximation du logarithme
-        \item Problème: on connaît pas $\alpha_i$. Solution: on soustrait par $\ln(p_i)$ sans le $\alpha_i$. Puisque l'on fait déjà des approximations avec les flottants, ce n'est pas un problème car on va devoir introduire un \textbf{seuil} dans tous les cas
+    \begin{itemize}[<+->]
+        \item $O(n)$ au lieu de $O(n^2)$, voire $O(n\log n)$
+        \item $Q(x) = \prod_{i=1}^k p_i^{\alpha_i}$, soit $\ln(Q(x)) = \sum_{i=1}^k \alpha_i \ln(p_i)$.
+        \newline \underline{Idée}: soustraire par $\alpha_i \ln(p_i)$ au lieu de diviser par $p_i^{\alpha_i}$
+        \item $\log_2(Q(x)) \approx \text{nb\_bits}(Q(x))$
+        \item \underline{Problème}: on connaît pas $\alpha_i$. 
+        \newline \underline{Solution}: on soustrait par $\log_2(p_i)$ seulement. Des approximations necéssitent déjà un \textbf{seuil}
     \end{itemize}
-    
 \end{frame}
 
 \begin{frame}{Seuil}
-    Deux possibilités d'algorithme:
-    \begin{itemize}
-        \item Pour chaque $x_i$, on calcule $\log_2(Q(x_i))$ composant l'intervalle du crible, et donc on utilise un seuil assez petit. Coûteux à cause du calcul de chaque $\log_2(Q(x_i))$
-        \item En choisissant S assez petit, on remarque que les $\log_2(Q(x_i))$ sont de même ordre de grandeur, et donc on procède de la manière suivante:
-        \begin{itemize}
-            \item Avant le crible, l'intervalle est maintenant initialisé avec des $0$, permet de ne pas a avoir a calculer tous les $\log_2(Q(x_i))$.
-            \item Durant le crible, on ajoute $\log_2(p_i)$ dans l'intervalle au lieu de soustraire.
-            \item Après le crible, on calcule $\log_2(Q(x_1))$ où $x_1$ est le premier nombre de l'intervalle, et on l'utilise comme seuil.
-        \end{itemize}
+    \uncover<+->{L'algorithme se déroule de la manière suivante:}
+    \begin{itemize}[<+->]
+        \item Avant le crible, l'intervalle est initialisé avec des $0$
+        \item Durant le crible, on ajoute $\log_2(p_i)$
+        \item Après le crible, on calcule $\log_2(Q(x_1))$ où $x_1$ est le premier nombre de l'intervalle, et on l'utilise comme seuil.
     \end{itemize}
-    
 \end{frame}
 
 %\subsection{MPQS}
 
 \section{Résultats}
 
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
 \begin{frame}{Résultats}
     Apres plusieurs centaines de tests, on a les résultats suivants:
     \newline
     \newline
-    \begin{tabularx}{\textwidth}{|X||X|X|X|}
+    \begin{tabularx}{\textwidth}{|c||Y|Y|Y|}
         \hline
         Bits & Dixon & QSIEVE & MPQS \\
         \hline \hline
-        60 & 0.5 & 0.05s & - \\
+        60 & 0.5s & 0.05s & - \\
         \hline
         80 & 5s & 0.1s & - \\
         \hline
@@ -382,7 +390,6 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
 {
 \setbeamertemplate{headline}{}
 \setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{footline}{}
 \begin{frame}{Graphique final}
     \noindent
     \begingroup
