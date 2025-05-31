@@ -1,10 +1,55 @@
+\addtocounter{framenumber}{-1}
+\setbeamertemplate{footline}{}
+\subsection*{Démonstrations}
+
+\begin{frame}
+    \addtocounter{framenumber}{-1}
+    \begin{block}{Proposition}
+    Soient $b\in \mathbb N, (x_i)_{i\in \llbracket 1, b+1\rrbracket}\in \mathbb N^{b+1}$
+    et $(v_i)_{i\in \llbracket 1, b+1\rrbracket}\in \mathbb F_2^b$ les vecteurs valuations de $x_i^2 \pmod N$ pour $i \in \llbracket 1,b+1 \rrbracket$
+    et finalement $(\lambda_i)_{i \in \llbracket 1,b+1 \rrbracket}\in \mathbb \{0,1\}^{b+1}$ tels que,
+    \[
+    \sum_{i=1}^{b+1} \lambda_iv_i = 0_{\mathbb F_2^b} = (2\alpha_1, \dots, 2\alpha_b)
+    \]
+    \newline
+    On pose $y = \prod_{j=1}^b p_j^{\alpha_j}$ et $x = \prod_{j=1}^{b+1}x_j^{\lambda_j}$, alors $x ^2 \equiv y ^2 \pmod N$
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \addtocounter{framenumber}{-1}
+    \begin{block}{Démonstration}
+        \begin{align*}
+            x^2 = (\prod_{i=1}^{b+1} x_i^2)^{\lambda_i} &\equiv \prod_{i=1}^{b+1} \prod_{j=1}^b p_j^{\lambda_iv_i^{(j)}} \pmod N\\
+            &\equiv \prod_{j=1}^b \prod_{i=1}^{b+1} p_j^{\lambda_iv_i^{(j)}} \pmod N\\
+            &\equiv \prod_{j=1}^b p_j^{\sum_{i =1}^{b+1}\lambda_iv_i^{(j)}} \pmod N\\
+            &\equiv (\prod_{j=1}^b p_j^{\alpha_j})^2 \pmod N \qquad\quad (\text{déf de } \alpha_j) \\ % cursed but works
+            &\equiv y^2 \pmod N
+        \end{align*}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \addtocounter{framenumber}{-1}
+    \begin{block}{Proposition}
+        Si $Q = (\sqrt N + X)^2 - N$, alors $p\mid Q(x) \implies \forall k\in \mathbb N,  p\mid Q(x+kp)$
+    \end{block}
+    \begin{block}{Démonstration}
+    En effet, supposons $p\mid Q(x)$, on a:
+    \begin{align*}
+        Q(x+kp) &= (\sqrt N + x+kp)^2 - N \\
+                &= Q(x) + 2kp(\sqrt N + x) + k^2p^2
+    \end{align*}
+    d'où $p\mid Q(x+kp)$
+    \end{block}
+\end{frame}
+
 {
 \UseRawInputEncoding
 
 %Make plain
 \setbeamertemplate{headline}{}
 \setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{footline}{}
 %
 
 %Set code colours and style
@@ -34,10 +79,6 @@
     \pagebreak
 }
 %
-
-\begin{frame}{Présentation}
-    Les derniers codes sont tous accessibles depuis mon \href{https://github.com/TristanDelcourt/TIPE}{GitHub}
-\end{frame}
 
 \subsection*{Codes}
 

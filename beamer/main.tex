@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \setbeamercovered{transparent}
 \setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
 \usetheme{Montpellier}
 \usecolortheme{crane}
 \usecolortheme{rose}
@@ -283,12 +284,7 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
     \begin{itemize}[<+->]
         \item Utilisation d'un polynôme $Q = (\sqrt N + X)^2 - N$ pour générer les $x_i$
         \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce à Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
-        \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$. En effet, 
-        \begin{align*}
-            Q(x+kp) &= (\sqrt N + x+kp)^2 - N \\
-                    &= Q(x) + 2kp(\sqrt N + x) + k^2p^2
-        \end{align*}
-        d'où $p|Q(x+kp)$
+        \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$
         \item Cribler sur un intervalle $\llbracket 1,S \rrbracket$, puis sur $\llbracket S+1,2S \rrbracket$ etc...
     \end{itemize}
 \end{frame}
@@ -337,14 +333,16 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs non-triviaux de $N$
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Seuil}
-    \uncover<+->{L'algorithme se déroule de la manière suivante:}
-    \begin{itemize}[<+->]
-        \item Avant le crible, l'intervalle est initialisé avec des $0$
-        \item Durant le crible, on ajoute $\log_2(p_i)$
-        \item Après le crible, on calcule $\log_2(Q(x_1))$ où $x_1$ est le premier nombre de l'intervalle, et on l'utilise comme seuil.
-    \end{itemize}
-\end{frame}
+\input{diagrams/anim_log.tex}
+
+%\begin{frame}{Seuil}
+%    \uncover<+->{L'algorithme se déroule de la manière suivante:}
+%    \begin{itemize}[<+->]
+%        \item Avant le crible, l'intervalle est initialisé avec des $0$
+%        \item Durant le crible, on ajoute $\log_2(p_i)$
+%        \item Après le crible, on calcule $\log_2(Q(x_1))$ où $x_1$ est le premier nombre de l'intervalle, et on l'utilise comme seuil.
+%    \end{itemize}
+%\end{frame}
 
 %\subsection{MPQS}
 
