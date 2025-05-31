@@ -2,6 +2,8 @@
 \setbeamertemplate{footline}{}
 \subsection*{Démonstrations}
 
+
+\label{demo:congdecarre}
 \begin{frame}
     \addtocounter{framenumber}{-1}
     \begin{block}{Proposition}
@@ -29,16 +31,18 @@
     \end{block}
 \end{frame}
 
+\label{demo:qx}
 \begin{frame}
     \addtocounter{framenumber}{-1}
     \begin{block}{Proposition}
-        Si $Q = (\sqrt N + X)^2 - N$, alors $p\mid Q(x) \implies \forall k\in \mathbb N,  p\mid Q(x+kp)$
+        Si $Q = (\lfloor\sqrt N\rfloor + X)^2 - N$, alors $p\mid Q(x) \implies \forall k\in \mathbb N,  p\mid Q(x+kp)$
     \end{block}
     \begin{block}{Démonstration}
     En effet, supposons $p\mid Q(x)$, on a:
     \begin{align*}
-        Q(x+kp) &= (\sqrt N + x+kp)^2 - N \\
-                &= Q(x) + 2kp(\sqrt N + x) + k^2p^2
+        Q(x+kp) &= (\lfloor\sqrt N\rfloor + x+kp)^2 - N \\
+                &= Q(x) + 2kp(\lfloor\sqrt N\rfloor+ x) + k^2p^2 \\
+                &= Q(x) + p\times(2k(\lfloor\sqrt N\rfloor + x) + k^2p)
     \end{align*}
     d'où $p\mid Q(x+kp)$
     \end{block}

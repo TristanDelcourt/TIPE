@@ -220,7 +220,7 @@ def main(numbers: List[int], factors: List[Tuple[int, int]], bitcount: int, algo
 def plot_optimization_results():
     """
     Read optimization results from JSON file, sort by bit size, and create plots
-    showing average factoring time vs bit size for each algorithm
+    showing average factoring time vs bit size for each algorithm, with uncertainty bars.
     """
     backup_file = os.path.join(os.path.dirname(__file__), "optimization_results.json")
     
@@ -231,35 +231,43 @@ def plot_optimization_results():
     with open(backup_file, "r") as f:
         data = json.load(f)
     
-    # Group data by algorithm
-    algorithm_data = {}
+    # Group data by algorithm and bit count
+    from collections import defaultdict
+    grouped = defaultdict(lambda: defaultdict(list))
     for entry in data:
-        algo = entry.get("algorithm", "mpqs")  # Default to mpqs for backward compatibility
-        if algo not in algorithm_data:
-            algorithm_data[algo] = []
-        algorithm_data[algo].append(entry)
+        algo = entry.get("algorithm", "mpqs")
+        bit_count = entry["bit_count"]
+        grouped[algo][bit_count].append(entry["avg_time"])
     
-    # Create the plot
     plt.figure(figsize=(12, 8))
     
-    for algo, entries in algorithm_data.items():
-        # Sort data by bit count
-        sorted_data = sorted(entries, key=lambda x: x["bit_count"])
-        
-        # Extract data for plotting
-        bit_counts = [entry["bit_count"] for entry in sorted_data]
-        avg_times = [entry["avg_time"] for entry in sorted_data]
-        
-        plt.plot(bit_counts, avg_times, 'o-', label=algo.upper())
+    for algo, bit_dict in grouped.items():
+        bit_counts = []
+        means = []
+        lower_err = []
+        upper_err = []
+        for bit_count in sorted(bit_dict):
+            times = bit_dict[bit_count]
+            mean = sum(times) / len(times)
+            min_time = min(times)
+            max_time = max(times)
+            bit_counts.append(bit_count)
+            means.append(mean)
+            lower_err.append(mean - min_time)
+            upper_err.append(max_time - mean)
+        # Error bars: asymmetric, from min to max
+        plt.errorbar(
+            bit_counts, means, 
+            yerr=[lower_err, upper_err], 
+            fmt='o-', capsize=5, label=algo.upper()
+        )
     
     plt.yscale('log')
     plt.xlabel('Taille en bits')
     plt.ylabel('Temps moyen de factorisation (secondes)')
-    #plt.title('Factoring Algorithm Performance Comparison')
     plt.grid(True)
     plt.legend()
     
-    # Save the plot
     plot_file = os.path.join(os.path.dirname(__file__), "optimization_plot.png")
     plt.savefig(plot_file)
     plt.close()
@@ -333,11 +341,11 @@ def generate_test_cases(n: int, bit_length: int) -> List[int]:
 if __name__ == "__main__":
     # Test different bit lengths with different algorithms
     
-    bits = [140]
-    algorithms = ['qsieve']
-    
-    numbers, factors = generate_test_cases(1, 250)
-    print(numbers, factors)
+    #bits = [140]
+    #algorithms = ['qsieve']
+    #
+    #numbers, factors = generate_test_cases(1, 250)
+    #print(numbers, factors)
     #for bit_length in bits:
     #    numbers, factors = generate_test_cases(1, bit_length)  # Generate same numbers for fair comparison
     #    for algo in algorithms:
