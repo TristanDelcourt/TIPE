@@ -1,82 +1,8 @@
 \documentclass{beamer}
-\setbeamercovered{transparent}
-\setbeamertemplate{footline}[frame number]
-\setbeamertemplate{navigation symbols}{}
-\usetheme{Montpellier}
-\usecolortheme{crane}
-\usecolortheme{rose}
-\usecolortheme{seahorse}
-
-% Packages
-% Avoid warnings with shapes and fonts
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-
-\usepackage{graphicx} % For diagrams
-\usepackage{stmaryrd} % For integer interval
-\usepackage{algorithm, algpseudocodex} % For natural code
-\usepackage{hyperref} % For hyperlinks
-\usepackage{tabularx} % For tables
-
-% For annexe
-\usepackage{color}
-\usepackage{listings}
-\usepackage{multicol} 
-%
-
-% Make summary
-\AtBeginSubsection[]
-{
-    \begin{frame}
-        \frametitle{Plan}
-        \tableofcontents[currentsection, currentsubsection]
-    \end{frame}
-}
-
-\AtBeginSection[]
-{
-    \begin{frame}
-        \frametitle{Plan}
-        \tableofcontents[currentsection]
-    \end{frame}
-}
-%
-
-% Rename keywords
-\renewcommand{\algorithmicrequire}{\textbf{Entrée:}}
-\renewcommand{\algorithmicensure}{\textbf{Sortie:}}
-% \renewcommand{\algorithmiccomment}[1]{\{#1\}}
-\renewcommand{\algorithmicend}{\textbf{fin}}
-\renewcommand{\algorithmicif}{\textbf{si}}
-\renewcommand{\algorithmicthen}{\textbf{alors}}
-\renewcommand{\algorithmicelse}{\textbf{sinon}}
-\renewcommand{\algorithmicfor}{\textbf{pour}}
-\renewcommand{\algorithmicforall}{\textbf{pour tout}}
-\renewcommand{\algorithmicdo}{\textbf{faire}}
-\renewcommand{\algorithmicwhile}{\textbf{tant que}}
-\renewcommand{\algorithmicreturn}{\textbf{renvoyer}}
-\renewcommand{\algorithmicprocedure}{\textbf{procédure}}
-\newcommand{\algorithmicelsif}{\algorithmicelse\ \algorithmicif}
-\newcommand{\algorithmicendif}{\algorithmicend\ \algorithmicif}
-\newcommand{\algorithmicendfor}{\algorithmicend\ \algorithmicfor}
-\floatname{algorithm}{Algorithme}
-%
-
-% Custom commands for animating frames
-\newcommand{\animframe}[1]{
-    \addtocounter{framenumber}{-1}
-    \begin{frame}
-        \noindent
-        \begingroup
-        \centering
-        \makebox[0pt]{\includegraphics[width=12cm]{#1}}\par
-        \endgroup
-    \end{frame}
-}
-%
+\input{param.tex}
 
 \title{Peut-on factoriser suffisamment rapidement les nombres en facteurs premiers?}
-\author{Tristan Delcourt, Louise Nguyen}
+\author{Tristan Delcourt (15699), Louise Nguyen (28438)}
 \date{2025}
 
 \begin{document}
@@ -133,15 +59,38 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs \underline{non-triviaux} de 
         $$
         \item On pose $y = \prod_{j=1}^b p_j^{\alpha_j}$ et $x = \prod_{j=1}^{b+1}x_j^{\lambda_j}$ 
     \end{itemize}
-    \uncover<+->{\begin{block}{Résultat admis (calcul en \hyperref[demo:congdecarre]{Annexe})}
+    \uncover<+->{\begin{block}{Résultat admis (calcul en \hyperref[demo:congdecarre]{annexe})}
         $x ^2 \equiv y ^2 \pmod N$
     \end{block}}
 \end{frame}
 
-\begin{frame}
-    On peut trouver les $\lambda_i$ avec un système que l'on résout avec un \textbf{pivot de Gauss}
+\begin{frame}[fragile]{Résolution du système}
+    %On peut trouver les $\lambda_i$ avec un système que l'on résout avec un \textbf{pivot de Gauss}
+    \begin{lstlisting}[style=slideStyle]
+typedef struct system {
+    int** m; // matrice du systeme
+    int* perm; // permutation de la solution 
+    int* sol; // le vecteur lambda
+    bool done; // iteration des solutions fini?
+    int n1, n2, arb;
+} system_s;
+
+typedef system_s* system_t;
+    \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]
+    \begin{lstlisting}[style=slideStyle]
+// initialise le systeme et donne une premiere solution dans 'sol' avec un pivot de Gauss
+system_t init_gauss(int** v, int n1, int n2);
+
+// itere la solution trouvee, la stocke dans 'sol' et met 'done' a true si c'est la derniere
+void gaussien_step(system_t s);
+
+// libere la memoire du systeme
+void free_system(system_t s);
+    \end{lstlisting}
+\end{frame}
 
 %\begin{frame}{Un exemple}
 %    \begin{itemize}
@@ -228,30 +177,30 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs \underline{non-triviaux} de 
 
 \subsection{L'algorithme final}
 
-\begin{frame}{L'algorithme final}
-    \begin{algorithm}[H]
-    \caption{Recherche de nombres}
-    \small
-    \begin{algorithmic}[1]
-        \Require{$N \in \mathbb N$ composé, $b \in \mathbb N$}
-        \Ensure{$(v_i)_{i \in \llbracket 1,b+1 \rrbracket}, (x_i)_{i \in \llbracket 1,b+1 \rrbracket}$}
-        \Statex
-        \For{$i\gets1 \dots b+1$}
-            \State $en\_cours \gets V$
-            \While{$en\_cours$}
-                \State{$x_i \gets \mathbb U(1, N-1)$}
-                \If{$x_i^2 \bmod N$ est factorisable} \Comment{par algorithme naïf}
-                    \State $en\_cours \gets F$
-                    \State $v_i \gets (v_i^{(1)}, \dots, v_i^{(b)})$
-                \EndIf
-            \EndWhile
-        \EndFor
-        \Statex
-        \Statex
-        \Return $(v_i)_{i \in \llbracket 1,b+1 \rrbracket}, (x_i)_{i \in \llbracket 1,b+1 \rrbracket}$
-    \end{algorithmic}
-    \end{algorithm}
-\end{frame}
+%\begin{frame}{L'algorithme final}
+%    \begin{algorithm}[H]
+%    \caption{Recherche de nombres}
+%    \small
+%    \begin{algorithmic}[1]
+%        \Require{$N \in \mathbb N$ composé, $b \in \mathbb N$}
+%        \Ensure{$(v_i)_{i \in \llbracket 1,b+1 \rrbracket}, (x_i)_{i \in \llbracket 1,b+1 \rrbracket}$}
+%        \Statex
+%        \For{$i\gets1 \dots b+1$}
+%            \State $en\_cours \gets V$
+%            \While{$en\_cours$}
+%                \State{$x_i \gets \mathbb U(1, N-1)$}
+%                \If{$x_i^2 \bmod N$ est factorisable} \Comment{par algorithme naïf}
+%                    \State $en\_cours \gets F$
+%                    \State $v_i \gets (v_i^{(1)}, \dots, v_i^{(b)})$
+%                \EndIf
+%            \EndWhile
+%        \EndFor
+%        \Statex
+%        \Statex
+%        \Return $(v_i)_{i \in \llbracket 1,b+1 \rrbracket}, (x_i)_{i \in \llbracket 1,b+1 \rrbracket}$
+%    \end{algorithmic}
+%    \end{algorithm}
+%\end{frame}
 
 \begin{frame}{L'algorithme final}
     \begin{algorithm}[H]
@@ -290,10 +239,10 @@ $N \land(x-y)$ et $N \land (x+y)$ sont des facteurs \underline{non-triviaux} de 
 
 \begin{frame}{Principe}
     \begin{itemize}[<+->]
-        \item Utilisation d'un polynôme $Q = (\lfloor\sqrt N\rfloor + X)^2 - N$ pour générer les $x_i$
-        \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce à Tonelli-Shanks, 2 solutions $x_1$ et $x_2$ dans $\llbracket 1, p \rrbracket$.
-        \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$ (Démonstration en \hyperref[demo:qx]{Annexe})
-        \item Cribler sur un intervalle $\llbracket 1,S \rrbracket$, puis sur $\llbracket S+1,2S \rrbracket$ etc...
+        \item Utilisation d'un polynôme $Q = (\underbrace{\lfloor\sqrt N\rfloor + X}_{x_i})^2 - N$ %pour générer les $x_i$
+        \item Résolution de $Q(x) \equiv 0 \pmod p$ grâce à Tonelli-Shanks, 2 solutions $x_p$ et $\tilde{x}_p$ dans $\llbracket 1, p \rrbracket$.
+        \item $p|Q(x) \implies \forall k\in \mathbb N,  p|Q(x+kp)$ (Démonstration en \hyperref[demo:qx]{annexe})
+        \item Cribler sur $T=[Q(1), Q(2), Q(3), \quad\dots, Q(S)]$
     \end{itemize}
 \end{frame}
 

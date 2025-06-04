@@ -54,31 +54,12 @@
 %Make plain
 \setbeamertemplate{headline}{}
 \setbeamertemplate{navigation symbols}{}
-%
-
-%Set code colours and style
-\definecolor{keywordsColour}{RGB}{0, 0, 255}
-\definecolor{stringsColour}{RGB}{162, 13, 13}
-\definecolor{commentsColour}{RGB}{0, 127, 0}
-\definecolor{identifierColour}{RGB}{0, 0, 0}
-
-\lstdefinestyle{fullStyle}{
-    breaklines=true,
-    columns=fullflexible,
-    language=C,
-    basicstyle=\tiny,
-    keywordstyle=\bfseries\color{keywordsColour},
-    commentstyle=\itshape\color{commentsColour},
-    identifierstyle=\color{identifierColour},
-    stringstyle=\color{stringsColour},
-}
-%
 
 % Import code command
 \newcommand{\importcode}[1]{
     \begin{flushright}\textit{#1}\end{flushright}
     \begin{multicols}{2}
-        \lstinputlisting[style=fullStyle]{#1}
+        \lstinputlisting[style=annexeStyle]{#1}
     \end{multicols}
     \pagebreak
 }

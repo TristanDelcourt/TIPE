@@ -1,0 +1,101 @@
+\setbeamercovered{transparent}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+\usetheme{Montpellier}
+\usecolortheme{crane}
+\usecolortheme{rose}
+\usecolortheme{seahorse}
+
+% Packages
+% Avoid warnings with shapes and fonts
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{graphicx} % For diagrams
+\usepackage{stmaryrd} % For integer interval
+\usepackage{algorithm, algpseudocodex} % For natural code
+\usepackage{hyperref} % For hyperlinks
+\usepackage{tabularx} % For tables
+
+% For annexe
+\usepackage{color}
+\usepackage{listings}
+\usepackage{multicol} 
+%
+
+% Make summary
+\AtBeginSubsection[]
+{
+    \begin{frame}
+        \frametitle{Plan}
+        \tableofcontents[currentsection, currentsubsection]
+    \end{frame}
+}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Plan}
+        \tableofcontents[currentsection]
+    \end{frame}
+}
+%
+
+% Rename keywords
+\renewcommand{\algorithmicrequire}{\textbf{Entrée:}}
+\renewcommand{\algorithmicensure}{\textbf{Sortie:}}
+\renewcommand{\algorithmicend}{\textbf{fin}}
+\renewcommand{\algorithmicif}{\textbf{si}}
+\renewcommand{\algorithmicthen}{\textbf{alors}}
+\renewcommand{\algorithmicelse}{\textbf{sinon}}
+\renewcommand{\algorithmicfor}{\textbf{pour}}
+\renewcommand{\algorithmicforall}{\textbf{pour tout}}
+\renewcommand{\algorithmicdo}{\textbf{faire}}
+\renewcommand{\algorithmicwhile}{\textbf{tant que}}
+\renewcommand{\algorithmicreturn}{\textbf{renvoyer}}
+\renewcommand{\algorithmicprocedure}{\textbf{procédure}}
+\newcommand{\algorithmicelsif}{\algorithmicelse\ \algorithmicif}
+\newcommand{\algorithmicendif}{\algorithmicend\ \algorithmicif}
+\newcommand{\algorithmicendfor}{\algorithmicend\ \algorithmicfor}
+\floatname{algorithm}{Algorithme}
+%
+
+% Custom commands for animating frames
+\newcommand{\animframe}[1]{
+    \addtocounter{framenumber}{-1}
+    \begin{frame}
+        \noindent
+        \begingroup
+        \centering
+        \makebox[0pt]{\includegraphics[width=12cm]{#1}}\par
+        \endgroup
+    \end{frame}
+}
+%
+
+%Set code colours and styles
+\definecolor{keywordsColour}{RGB}{0, 0, 255}
+\definecolor{stringsColour}{RGB}{162, 13, 13}
+\definecolor{commentsColour}{RGB}{0, 127, 0}
+\definecolor{identifierColour}{RGB}{0, 0, 0}
+
+\lstdefinestyle{annexeStyle}{
+    breaklines=true,
+    columns=fullflexible,
+    language=C,
+    basicstyle=\tiny,
+    keywordstyle=\bfseries\color{keywordsColour},
+    commentstyle=\color{commentsColour},
+    identifierstyle=\color{identifierColour},
+    stringstyle=\color{stringsColour},
+}
+
+\lstdefinestyle{slideStyle}{
+    breaklines=true,
+    columns=fullflexible,
+    language=C,
+    keywordstyle=\bfseries\color{keywordsColour},
+    commentstyle=\color{commentsColour},
+    identifierstyle=\color{identifierColour},
+    stringstyle=\color{stringsColour},
+}
