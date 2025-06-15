@@ -6,4 +6,5 @@
 /tests/products
 **/vgcore*
 
-/beamer/_latex-build
+/beamer/_latex-build/
+/code_jury/_latex-build

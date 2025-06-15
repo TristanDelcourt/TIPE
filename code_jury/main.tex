@@ -1,0 +1,138 @@
+\documentclass{article}
+
+% For code
+\usepackage{color} 
+
+% Allow certain caracters
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% Allow bigger font for title
+\usepackage{lmodern}
+\usepackage{listings}
+
+% Clickable table of contents
+\usepackage[hidelinks]{hyperref}
+
+% Custom margins
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    total={170mm,257mm},
+    left=20mm,
+    top=20mm,
+}
+
+% Import code command
+\newcommand{\importcode}[1]{
+    \subsection{#1}
+    \lstinputlisting[style=VScode]{../c/#1}
+    \pagebreak
+}
+%
+    
+%Set code colours and styles
+\definecolor{keywordsColour}{RGB}{0, 0, 255}
+\definecolor{stringsColour}{RGB}{162, 13, 13}
+\definecolor{commentsColour}{RGB}{0, 127, 0}
+\definecolor{identifierColour}{RGB}{0, 0, 0}
+
+\lstdefinestyle{VScode}{
+    % Basic config
+    inputencoding=utf8,
+    breaklines=true,
+    language=C,
+    % Numbering
+    numbers=left,
+    numbersep=2em,
+    numberstyle=\normalsize,
+    frame=leftline,
+    framexleftmargin=1em,
+    % Code
+    basicstyle=\large\ttfamily,
+    keywordstyle=\bfseries\color{keywordsColour},
+    commentstyle=\color{commentsColour},
+    identifierstyle=\color{identifierColour},
+    stringstyle=\color{stringsColour},
+    literate={ˇ}{{\v{}}}1 {²}{{$^2$}}1
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{\fill}
+        
+        \fontsize{60pt}{62pt}\selectfont
+        Recherche de facteurs premiers
+
+        \vspace{1cm}
+        
+        \hrule
+        
+        \vspace{1cm}
+        
+        \fontsize{40pt}{41pt}\selectfont
+        Code du TIPE
+
+        \vspace{1cm}
+
+        \huge
+        Tristan Delcourt (15699)
+
+        \vspace{10cm}
+
+        \vspace*{\fill}
+
+        \large
+        2025
+
+    \end{center}
+\end{titlepage}
+
+\renewcommand{\contentsname}{\huge Sommaire}
+\begin{Large}
+    \tableofcontents
+\end{Large}
+\pagebreak
+
+\section{Point d'entrée du programme}
+\importcode{main.c}
+
+
+\section{Modules utiles}
+\importcode{vector.h}
+\importcode{vector.c}
+\importcode{tonellishanks.h}
+\importcode{tonellishanks.c}
+\importcode{system.h}
+\importcode{system.c}
+\importcode{parse\_input.h}
+\importcode{parse\_input.c}
+\importcode{list\_matrix\_utils.h}
+\importcode{list\_matrix\_utils.c}
+\importcode{factorbase.h}
+\importcode{factorbase.c}
+
+\section{Algorithme de Dixon}
+\importcode{dixon/dixon.h}
+\importcode{dixon/dixon.c}
+
+\section{Crible quadratique}
+\importcode{qsieve/qsieve.h}
+\importcode{qsieve/qsieve.c}
+
+\section{MPQS}
+\importcode{mpqs/common\_mpqs.h}
+\importcode{mpqs/common\_mpqs.c}
+\importcode{mpqs/polynomial.h}
+\importcode{mpqs/polynomial.c}
+\importcode{mpqs/mpqs.h}
+\importcode{mpqs/mpqs.c}
+
+\section{MPQS parallélisé}
+\importcode{mpqs/parallel\_mpqs.h}
+\importcode{mpqs/parallel\_mpqs.c}
+
+\end{document}
