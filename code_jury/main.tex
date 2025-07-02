@@ -15,6 +15,14 @@
 % Clickable table of contents
 \usepackage[hidelinks]{hyperref}
 
+% Blank pages
+\usepackage{afterpage}
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
 % Custom margins
 \usepackage{geometry}
 \geometry{
@@ -60,6 +68,7 @@
 
 \begin{document}
 
+\afterpage{\blankpage}
 \begin{titlepage}
     \begin{center}
         \vspace*{\fill}
@@ -91,6 +100,7 @@
     \end{center}
 \end{titlepage}
 
+\afterpage{\blankpage}
 \renewcommand{\contentsname}{\huge Sommaire}
 \begin{Large}
     \tableofcontents
